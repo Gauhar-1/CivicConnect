@@ -3,7 +3,7 @@
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { getCandidateById, mockCandidates } from '@/lib/mockData'; // Assuming mockData provides a getter
+import { getCandidateById, mockCandidates } from '@/lib/mockData';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCircle, ArrowLeft, FileText, MapPin, Users } from 'lucide-react';
@@ -12,9 +12,7 @@ import { Badge } from '@/components/ui/badge';
 export default function CandidateProfilePage() {
   const params = useParams();
   const candidateId = typeof params.id === 'string' ? params.id : '';
-  // In a real app, you'd fetch candidate data here based on ID
-  // const candidate = await fetchCandidate(candidateId);
-  const candidate = getCandidateById(candidateId) || mockCandidates.find(c => c.id === candidateId); // Fallback if not in mock by ID func
+  const candidate = getCandidateById(candidateId) || mockCandidates.find(c => c.id === candidateId); 
 
   if (!candidate) {
     return (

@@ -64,6 +64,7 @@ export const mockFeedPosts: FeedPost[] = [
     likes: 230,
     comments: 45,
     shares: 20,
+    dataAiHintPost: ''
   },
   {
     id: 'post3',

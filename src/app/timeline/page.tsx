@@ -29,7 +29,7 @@ function ElectionEventCard({ event }: { event: ElectionEvent }) {
 }
 
 export default function ElectionTimelinePage() {
-  // Sort events by date - assuming date strings can be parsed or are already sorted
+  
   const sortedEvents = [...mockElectionEvents].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   return (

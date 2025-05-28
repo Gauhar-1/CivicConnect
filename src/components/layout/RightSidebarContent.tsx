@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { TrendingUp, Users, Search } from 'lucide-react';
+import { TrendingUp, Users, Search, HandHeart } from 'lucide-react';
 
 const trendingElections = [
   { id: '1', name: 'City Council Election 2024', date: 'Nov 5, 2024' },
@@ -57,7 +57,7 @@ export function RightSidebarContent() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center text-xl">
-            <Users className="mr-2 h-5 w-5 text-primary" />
+            <HandHeart className="mr-2 h-5 w-5 text-primary" />
             Volunteer Opportunities
           </CardTitle>
         </CardHeader>
@@ -65,9 +65,11 @@ export function RightSidebarContent() {
           <p className="text-sm mb-3">
             Make a difference in your community. Sign up to volunteer for a campaign.
           </p>
-          <Button variant="secondary" className="w-full">
-            Sign Up to Volunteer
-          </Button>
+          <Link href="/volunteer-signup" passHref>
+            <Button variant="secondary" className="w-full">
+              Sign Up to Volunteer
+            </Button>
+          </Link>
         </CardContent>
       </Card>
     </div>

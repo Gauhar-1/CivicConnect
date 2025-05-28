@@ -21,7 +21,6 @@ export function LeftSidebarNav() {
   return (
     <Sidebar side="left" variant="sidebar" collapsible="icon">
       <SidebarHeader className="items-center justify-center p-4 hidden md:flex">
-        {/* Logo or App Name for collapsed state can go here if needed */}
       </SidebarHeader>
       <SidebarContent className="p-2">
         <SidebarMenu>

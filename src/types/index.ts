@@ -1,21 +1,24 @@
 export interface Candidate {
+  dataAiHint: string;
   id: string;
   name: string;
   party: string;
   region: string;
   imageUrl?: string;
   keyPolicies: string[];
-  manifestoUrl?: string; // Link to full manifesto or page
+  manifestoUrl?: string; 
   profileBio?: string;
 }
 
 export interface FeedPost {
+  dataAiHintPost: string;
+  dataAiHintCandidate: string;
   id: string;
   candidateName: string;
   candidateParty?: string;
-  candidateRole?: string; // e.g., "Candidate for Mayor"
+  candidateRole?: string; 
   candidateImageUrl?: string;
-  timestamp: string; // ISO date string
+  timestamp: string; 
   content: string;
   postImageUrl?: string;
   likes: number;
@@ -26,19 +29,20 @@ export interface FeedPost {
 export interface ElectionEvent {
   id: string;
   title: string;
-  date: string; // Could be Date object or string
+  date: string;
   description: string;
   type: 'Deadline' | 'Key Event' | 'Election Day';
 }
 
 export interface Campaign {
+  dataAiHint: string;
   id: string;
   name: string;
   party?: string;
   imageUrl?: string;
   description: string;
   location: string;
-  popularityScore: number; // For sorting
+  popularityScore: number;
   category: 'Local' | 'State' | 'National';
 }
 
@@ -48,7 +52,18 @@ export interface Report {
   description: string;
   category: string;
   status: 'Submitted' | 'In Review' | 'Resolved' | 'Rejected';
-  dateSubmitted: string; // ISO date string
+  dateSubmitted: string; 
   isAnonymous: boolean;
   attachments?: { name: string; url: string }[];
+}
+
+export interface VolunteerSignup {
+  id: string;
+  fullName: string;
+  email: string;
+  phone?: string;
+  interests: string[];
+  availability: string;
+  message?: string;
+  submittedAt: string;
 }

@@ -1,12 +1,5 @@
 'use server';
 
-/**
- * @fileOverview Summarizes a candidate's manifesto.
- *
- * - summarizeCandidateManifesto - A function that summarizes a candidate's manifesto.
- * - SummarizeCandidateManifestoInput - The input type for the summarizeCandidateManifesto function.
- * - SummarizeCandidateManifestoOutput - The return type for the summarizeCandidateManifesto function.
- */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';

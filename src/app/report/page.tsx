@@ -14,14 +14,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { AlertTriangle, CheckCircle, FileUp, Loader2, ListChecks } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { Report } from '@/types';
-import { mockReports } from '@/lib/mockData'; // For displaying mock submitted reports
+import { mockReports } from '@/lib/mockData'; 
 import { format } from 'date-fns';
 
 const reportSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters').max(100, 'Title cannot exceed 100 characters'),
   description: z.string().min(20, 'Description must be at least 20 characters').max(2000, 'Description cannot exceed 2000 characters'),
   category: z.enum(['Candidate Behavior', 'False Information', 'Election Process', 'Other']),
-  attachment: z.any().optional(), // For mock purposes, not handling actual file uploads
+  attachment: z.any().optional(),
   isAnonymous: z.boolean().default(false),
 });
 
@@ -30,7 +30,7 @@ type ReportFormData = z.infer<typeof reportSchema>;
 export default function ReportIssuePage() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [submittedReports, setSubmittedReports] = useState<Report[]>(mockReports); // Initialize with mock data
+  const [submittedReports, setSubmittedReports] = useState<Report[]>(mockReports); 
 
   const form = useForm<ReportFormData>({
     resolver: zodResolver(reportSchema),
@@ -42,7 +42,7 @@ export default function ReportIssuePage() {
 
   const onSubmit: SubmitHandler<ReportFormData> = async (data) => {
     setIsLoading(true);
-    // Simulate API call
+
     await new Promise(resolve => setTimeout(resolve, 1500));
     
     const newReport: Report = {
@@ -53,7 +53,6 @@ export default function ReportIssuePage() {
       status: 'Submitted',
       dateSubmitted: new Date().toISOString(),
       isAnonymous: data.isAnonymous,
-      // attachments: data.attachment ? [{ name: data.attachment.name, url: '#' }] : undefined, // Mock attachment handling
     };
     setSubmittedReports(prev => [newReport, ...prev]);
 
