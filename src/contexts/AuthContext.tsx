@@ -3,7 +3,7 @@
 
 import type { User, Role } from '@/types';
 import { createContext, useContext, useState, type ReactNode, useEffect, useCallback } from 'react';
-import { loginAction, type LoginCredentials } from '@/app/login/actions';
+import { loginAction, type LoginCredentials } from '@/app/(auth)/login/actions'; // Updated import path
 import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
@@ -27,8 +27,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const storedUser = localStorage.getItem('authUser');
       if (storedUser) {
         const parsedUser: User = JSON.parse(storedUser);
-        // If a user is in localStorage, assume it's valid for this prototype
-        // The original loginAction is the source of truth for mockUsers validation
+        // For this prototype, if a user is in localStorage, assume it's valid.
+        // The loginAction is the source of truth for actual validation against mockUsers.
         setUser(parsedUser);
       } else {
         setUser(null);
@@ -63,7 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('authUser');
-    router.push('/login');
+    router.push('/login'); // Path remains /login due to route group
   };
 
   const role = user?.role || 'ANONYMOUS';

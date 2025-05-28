@@ -7,10 +7,10 @@ import { z } from 'zod';
 // IMPORTANT: In a real application, NEVER store passwords in plaintext.
 // Always hash passwords securely (e.g., using bcrypt or Argon2).
 const mockUsers = [
-  { id: 'user-admin', email: 'admin@example.com', password: 'password', role: 'ADMIN', name: 'Admin User' },
-  { id: 'user-candidate', email: 'candidate@example.com', password: 'password', role: 'CANDIDATE', name: 'Candidate Test' },
-  { id: 'user-volunteer', email: 'volunteer@example.com', password: 'password', role: 'VOLUNTEER', name: 'Volunteer Test' },
-  { id: 'user-voter', email: 'voter@example.com', password: 'password', role: 'VOTER', name: 'Voter Test' },
+  { id: 'user-admin', email: 'admin@example.com', password: 'password', role: 'ADMIN' as const, name: 'Admin User' },
+  { id: 'user-candidate', email: 'candidate@example.com', password: 'password', role: 'CANDIDATE' as const, name: 'Candidate Test' },
+  { id: 'user-volunteer', email: 'volunteer@example.com', password: 'password', role: 'VOLUNTEER' as const, name: 'Volunteer Test' },
+  { id: 'user-voter', email: 'voter@example.com', password: 'password', role: 'VOTER' as const, name: 'Voter Test' },
 ];
 
 const loginSchema = z.object({
