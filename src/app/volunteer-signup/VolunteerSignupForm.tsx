@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -14,6 +15,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Loader2, Send, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { volunteerSignupAction } from './actions';
+import {
+  Form, // Import Form
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+} from "@/components/ui/form";
 
 const interestAreas = [
   { id: 'canvassing', label: 'Canvassing (Door-to-door)' },
@@ -98,116 +106,106 @@ export function VolunteerSignupForm() {
         <CardDescription>Tell us a bit about yourself and how you'd like to help.</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div>
-            <Label htmlFor="fullName">Full Name</Label>
-            <Input id="fullName" {...form.register('fullName')} placeholder="e.g., Jane Doe" />
-            {form.formState.errors.fullName && <p className="text-sm text-destructive mt-1">{form.formState.errors.fullName.message}</p>}
-          </div>
-
-          <div>
-            <Label htmlFor="email">Email Address</Label>
-            <Input id="email" type="email" {...form.register('email')} placeholder="e.g., jane.doe@example.com" />
-            {form.formState.errors.email && <p className="text-sm text-destructive mt-1">{form.formState.errors.email.message}</p>}
-          </div>
-
-          <div>
-            <Label htmlFor="phone">Phone Number (Optional)</Label>
-            <Input id="phone" type="tel" {...form.register('phone')} placeholder="e.g., (555) 123-4567" />
-            {form.formState.errors.phone && <p className="text-sm text-destructive mt-1">{form.formState.errors.phone.message}</p>}
-          </div>
-
-          <div>
-            <Label>Areas of Interest (Select all that apply)</Label>
-            <div className="space-y-2 mt-1">
-              {interestAreas.map((item) => (
-                <FormField
-                  key={item.id}
-                  control={form.control}
-                  name="interests"
-                  render={({ field }) => {
-                    return (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value?.includes(item.id)}
-                            onCheckedChange={(checked) => {
-                              return checked
-                                ? field.onChange([...(field.value || []), item.id])
-                                : field.onChange(
-                                    (field.value || []).filter(
-                                      (value) => value !== item.id
-                                    )
-                                  );
-                            }}
-                          />
-                        </FormControl>
-                        <FormLabel className="font-normal">
-                          {item.label}
-                        </FormLabel>
-                      </FormItem>
-                    );
-                  }}
-                />
-              ))}
+        <Form {...form}> {/* Wrap with Form provider */}
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div>
+              <Label htmlFor="fullName">Full Name</Label>
+              <Input id="fullName" {...form.register('fullName')} placeholder="e.g., Jane Doe" />
+              {form.formState.errors.fullName && <p className="text-sm text-destructive mt-1">{form.formState.errors.fullName.message}</p>}
             </div>
-            {form.formState.errors.interests && <p className="text-sm text-destructive mt-1">{form.formState.errors.interests.message}</p>}
-          </div>
-          
-          <div>
-            <Label htmlFor="availability">Availability</Label>
-            <Controller
-              name="availability"
-              control={form.control}
-              render={({ field }) => (
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <SelectTrigger id="availability">
-                    <SelectValue placeholder="Select your availability" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availabilityOptions.map(option => (
-                      <SelectItem key={option} value={option}>{option}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+
+            <div>
+              <Label htmlFor="email">Email Address</Label>
+              <Input id="email" type="email" {...form.register('email')} placeholder="e.g., jane.doe@example.com" />
+              {form.formState.errors.email && <p className="text-sm text-destructive mt-1">{form.formState.errors.email.message}</p>}
+            </div>
+
+            <div>
+              <Label htmlFor="phone">Phone Number (Optional)</Label>
+              <Input id="phone" type="tel" {...form.register('phone')} placeholder="e.g., (555) 123-4567" />
+              {form.formState.errors.phone && <p className="text-sm text-destructive mt-1">{form.formState.errors.phone.message}</p>}
+            </div>
+
+            <div>
+              <Label>Areas of Interest (Select all that apply)</Label>
+              <div className="space-y-2 mt-1">
+                {interestAreas.map((item) => (
+                  <FormField
+                    key={item.id}
+                    control={form.control}
+                    name="interests"
+                    render={({ field }) => {
+                      return (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value?.includes(item.id)}
+                              onCheckedChange={(checked) => {
+                                return checked
+                                  ? field.onChange([...(field.value || []), item.id])
+                                  : field.onChange(
+                                      (field.value || []).filter(
+                                        (value) => value !== item.id
+                                      )
+                                    );
+                              }}
+                            />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            {item.label}
+                          </FormLabel>
+                        </FormItem>
+                      );
+                    }}
+                  />
+                ))}
+              </div>
+              {form.formState.errors.interests && <p className="text-sm text-destructive mt-1">{form.formState.errors.interests.message}</p>}
+            </div>
+            
+            <div>
+              <Label htmlFor="availability">Availability</Label>
+              <Controller
+                name="availability"
+                control={form.control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <SelectTrigger id="availability">
+                      <SelectValue placeholder="Select your availability" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availabilityOptions.map(option => (
+                        <SelectItem key={option} value={option}>{option}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {form.formState.errors.availability && <p className="text-sm text-destructive mt-1">{form.formState.errors.availability.message}</p>}
+            </div>
+
+            <div>
+              <Label htmlFor="message">Additional Information (Optional)</Label>
+              <Textarea id="message" {...form.register('message')} placeholder="Any specific skills, campaigns you're interested in, or other notes?" className="min-h-[100px]" />
+              {form.formState.errors.message && <p className="text-sm text-destructive mt-1">{form.formState.errors.message.message}</p>}
+            </div>
+
+            <Button type="submit" disabled={isLoading} className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                <>
+                  <Send className="mr-2 h-4 w-4" />
+                  Submit Application
+                </>
               )}
-            />
-            {form.formState.errors.availability && <p className="text-sm text-destructive mt-1">{form.formState.errors.availability.message}</p>}
-          </div>
-
-          <div>
-            <Label htmlFor="message">Additional Information (Optional)</Label>
-            <Textarea id="message" {...form.register('message')} placeholder="Any specific skills, campaigns you're interested in, or other notes?" className="min-h-[100px]" />
-            {form.formState.errors.message && <p className="text-sm text-destructive mt-1">{form.formState.errors.message.message}</p>}
-          </div>
-
-          <Button type="submit" disabled={isLoading} className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Submitting...
-              </>
-            ) : (
-              <>
-                <Send className="mr-2 h-4 w-4" />
-                Submit Application
-              </>
-            )}
-          </Button>
-        </form>
+            </Button>
+          </form>
+        </Form> {/* Close Form provider */}
       </CardContent>
     </Card>
   );
 }
-
-// Helper components from react-hook-form to avoid direct import if not already standard
-// For simplicity, assuming FormField, FormControl, FormItem, FormLabel are available via a general Form setup
-// or explicitly import them if not:
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  // FormDescription, Not used here
-  // FormMessage, Not used here directly, handled by p tags
-} from "@/components/ui/form";
