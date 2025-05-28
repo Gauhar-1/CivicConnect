@@ -22,7 +22,7 @@ export function LeftSidebarNav() {
     <Sidebar side="left" variant="sidebar" collapsible="icon">
       <SidebarHeader className="items-center justify-center p-4 hidden md:flex">
       </SidebarHeader>
-      <SidebarContent className="p-2">
+      <SidebarContent className="p-2 mt-9">
         <SidebarMenu>
           {NAV_LINKS.map((link) => (
             <SidebarMenuItem key={link.href}>
