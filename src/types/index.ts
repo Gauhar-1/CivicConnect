@@ -1,3 +1,4 @@
+
 export interface Candidate {
   dataAiHint: string;
   id: string;
@@ -62,6 +63,8 @@ export interface VolunteerSignup {
   fullName: string;
   email: string;
   phone?: string;
+  volunteerTarget: 'general' | 'candidate';
+  specificCandidateName?: string;
   interests: string[];
   availability: string;
   message?: string;

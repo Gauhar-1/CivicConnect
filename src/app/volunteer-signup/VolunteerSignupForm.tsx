@@ -11,16 +11,18 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Send, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { volunteerSignupAction } from './actions';
 import {
-  Form, // Import Form
+  Form,
   FormField,
   FormItem,
   FormLabel,
   FormControl,
+  FormMessage,
 } from "@/components/ui/form";
 
 const interestAreas = [
@@ -46,9 +48,29 @@ const formSchema = z.object({
   phone: z.string().optional().refine(val => !val || /^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/.test(val), {
     message: "Invalid phone number format."
   }),
+  volunteerTarget: z.enum(['general', 'candidate'], {
+    required_error: "Please select who you're volunteering for.",
+  }),
+  specificCandidateName: z.string().optional(),
   interests: z.array(z.string()).min(1, { message: 'Please select at least one area of interest.' }),
   availability: z.string().min(1, { message: 'Please select your availability.' }),
   message: z.string().max(500, { message: 'Message cannot exceed 500 characters.' }).optional(),
+}).superRefine((data, ctx) => {
+  if (data.volunteerTarget === 'candidate') {
+    if (!data.specificCandidateName || data.specificCandidateName.trim() === '') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Please enter the candidate's name.",
+        path: ['specificCandidateName'],
+      });
+    } else if (data.specificCandidateName.trim().length < 2) {
+       ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Candidate name must be at least 2 characters.",
+        path: ['specificCandidateName'],
+      });
+    }
+  }
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -63,11 +85,15 @@ export function VolunteerSignupForm() {
       fullName: '',
       email: '',
       phone: '',
+      volunteerTarget: undefined,
+      specificCandidateName: '',
       interests: [],
       availability: '',
       message: '',
     },
   });
+
+  const volunteerTargetValue = form.watch('volunteerTarget');
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     setIsLoading(true);
@@ -106,7 +132,7 @@ export function VolunteerSignupForm() {
         <CardDescription>Tell us a bit about yourself and how you'd like to help.</CardDescription>
       </CardHeader>
       <CardContent>
-        <Form {...form}> {/* Wrap with Form provider */}
+        <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div>
               <Label htmlFor="fullName">Full Name</Label>
@@ -125,6 +151,57 @@ export function VolunteerSignupForm() {
               <Input id="phone" type="tel" {...form.register('phone')} placeholder="e.g., (555) 123-4567" />
               {form.formState.errors.phone && <p className="text-sm text-destructive mt-1">{form.formState.errors.phone.message}</p>}
             </div>
+
+            <FormField
+              control={form.control}
+              name="volunteerTarget"
+              render={({ field }) => (
+                <FormItem className="space-y-3">
+                  <FormLabel>Volunteer For:</FormLabel>
+                  <FormControl>
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      className="flex flex-col space-y-1"
+                    >
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem value="general" />
+                        </FormControl>
+                        <FormLabel className="font-normal">
+                          General Campaign Support / Admin
+                        </FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem value="candidate" />
+                        </FormControl>
+                        <FormLabel className="font-normal">
+                          Specific Candidate
+                        </FormLabel>
+                      </FormItem>
+                    </RadioGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {volunteerTargetValue === 'candidate' && (
+              <div>
+                <Label htmlFor="specificCandidateName">Candidate Name</Label>
+                <Input 
+                  id="specificCandidateName" 
+                  {...form.register('specificCandidateName')} 
+                  placeholder="Enter candidate's name" 
+                />
+                {form.formState.errors.specificCandidateName && (
+                  <p className="text-sm text-destructive mt-1">
+                    {form.formState.errors.specificCandidateName.message}
+                  </p>
+                )}
+              </div>
+            )}
 
             <div>
               <Label>Areas of Interest (Select all that apply)</Label>
@@ -204,7 +281,7 @@ export function VolunteerSignupForm() {
               )}
             </Button>
           </form>
-        </Form> {/* Close Form provider */}
+        </Form>
       </CardContent>
     </Card>
   );

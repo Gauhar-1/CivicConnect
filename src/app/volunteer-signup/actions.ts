@@ -1,3 +1,4 @@
+
 'use server';
 
 import { z } from 'zod';
@@ -7,12 +8,30 @@ const volunteerSignupSchema = z.object({
   fullName: z.string().min(3).max(100),
   email: z.string().email(),
   phone: z.string().optional(),
+  volunteerTarget: z.enum(['general', 'candidate']),
+  specificCandidateName: z.string().optional(),
   interests: z.array(z.string()).min(1),
   availability: z.string().min(1),
   message: z.string().max(500).optional(),
+}).superRefine((data, ctx) => {
+  if (data.volunteerTarget === 'candidate') {
+    if (!data.specificCandidateName || data.specificCandidateName.trim() === '') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Please enter the candidate's name.",
+        path: ['specificCandidateName'],
+      });
+    } else if (data.specificCandidateName.trim().length < 2) {
+       ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Candidate name must be at least 2 characters.",
+        path: ['specificCandidateName'],
+      });
+    }
+  }
 });
 
-type VolunteerSignupInput = z.infer<typeof volunteerSignupSchema>;
+export type VolunteerSignupInput = z.infer<typeof volunteerSignupSchema>;
 
 interface ActionResult {
   success: boolean;
