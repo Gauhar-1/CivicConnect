@@ -1,5 +1,6 @@
+
 import type { LucideIcon } from 'lucide-react';
-import { Home, Users, CalendarDays, FileText, AlertTriangle, Search, Vote, HandHeart } from 'lucide-react';
+import { Home, Users, CalendarDays, FileText, AlertTriangle, Search, Vote, HandHeart, ShieldCheck } from 'lucide-react';
 
 export interface NavLink {
   href: string;
@@ -16,6 +17,12 @@ export const NAV_LINKS: NavLink[] = [
   { href: '/campaigns', label: 'Campaign Discovery', icon: Search },
   { href: '/volunteer-signup', label: 'Volunteer Signup', icon: HandHeart },
 ];
+
+export const ADMIN_NAV_LINK: NavLink = {
+  href: '/admin',
+  label: 'Admin Panel',
+  icon: ShieldCheck,
+};
 
 export const APP_NAME = 'CivicConnect';
 export const APP_ICON = Vote;

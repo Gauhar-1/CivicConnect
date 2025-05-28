@@ -1,4 +1,13 @@
 
+export type Role = 'ADMIN' | 'CANDIDATE' | 'VOLUNTEER' | 'VOTER' | 'ANONYMOUS';
+
+export interface User {
+  id: string;
+  email: string;
+  role: Role;
+  name?: string;
+}
+
 export interface Candidate {
   dataAiHint: string;
   id: string;
@@ -7,7 +16,7 @@ export interface Candidate {
   region: string;
   imageUrl?: string;
   keyPolicies: string[];
-  manifestoUrl?: string; 
+  manifestoUrl?: string;
   profileBio?: string;
 }
 
@@ -17,9 +26,9 @@ export interface FeedPost {
   id: string;
   candidateName: string;
   candidateParty?: string;
-  candidateRole?: string; 
+  candidateRole?: string;
   candidateImageUrl?: string;
-  timestamp: string; 
+  timestamp: string;
   content: string;
   postImageUrl?: string;
   likes: number;
@@ -53,7 +62,7 @@ export interface Report {
   description: string;
   category: string;
   status: 'Submitted' | 'In Review' | 'Resolved' | 'Rejected';
-  dateSubmitted: string; 
+  dateSubmitted: string;
   isAnonymous: boolean;
   attachments?: { name: string; url: string }[];
 }
