@@ -52,14 +52,14 @@ export function CreateCampaignForm({ onSubmitSuccess, onOpenChange }: CreateCamp
       party: data.party || undefined,
       description: data.description,
       location: data.location,
-      imageUrl: data.imageUrl || undefined,
-      dataAiHint: data.imageUrl ? 'campaign image' : undefined,
+      imageUrl: data.imageUrl || 'https://placehold.co/300x200.png', // Default placeholder
+      dataAiHint: data.imageUrl ? 'campaign image' : 'campaign event',
       category: data.category,
       popularityScore: Math.floor(Math.random() * 50) + 20, // Mock popularity
     };
     onSubmitSuccess(newCampaign);
     reset();
-    onOpenChange?.(false); // Close dialog on success
+    onOpenChange?.(false);
   };
 
   return (

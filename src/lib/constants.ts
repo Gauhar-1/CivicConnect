@@ -1,6 +1,7 @@
 
 import type { LucideIcon } from 'lucide-react';
-import { Home, Users, CalendarDays, FileText, AlertTriangle, Search, Vote, HandHeart, ListPlus } from 'lucide-react';
+import { Home, Users, CalendarDays, FileText, AlertTriangle, Search, Vote, HandHeart } from 'lucide-react';
+// ListPlus (for Create Poll) removed as it's no longer a direct nav link
 
 export interface NavLink {
   href: string;
@@ -16,7 +17,7 @@ export const NAV_LINKS: NavLink[] = [
   { href: '/report', label: 'Report an Issue', icon: AlertTriangle },
   { href: '/campaigns', label: 'Campaign Discovery', icon: Search },
   { href: '/volunteer-signup', label: 'Volunteer Signup', icon: HandHeart },
-  { href: '/polls/create', label: 'Create Poll', icon: ListPlus },
+  // { href: '/polls/create', label: 'Create Poll', icon: ListPlus }, // Removed this link
 ];
 
 

@@ -1,68 +1,97 @@
 
 'use client';
 
+import { useState } from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Send, Loader2 } from 'lucide-react'; 
-import type { FeedPost } from '@/types';
+import { Send, Loader2, ImagePlus } from 'lucide-react';
+import type { ImagePostFeedItem, TextPostFeedItem } from '@/types';
+import Image from 'next/image'; // For image preview
 
 const createPostSchema = z.object({
-  content: z.string().min(1, 'Post content cannot be empty.').max(1000, 'Post content is too long.'),
-  postImageUrl: z.string().url('Please enter a valid image URL.').optional().or(z.literal('')),
+  content: z.string().max(1000, 'Post content is too long.').optional(), // Optional if image is provided
+  imageFile: z.custom<FileList>().optional(), // For file upload
+}).refine(data => data.content || (data.imageFile && data.imageFile.length > 0), {
+  message: "Post must have either content or an image.",
+  path: ["content"], // Associate error with content field for display
 });
 
 type CreatePostFormData = z.infer<typeof createPostSchema>;
 
 interface CreatePostFormProps {
-  onSubmitSuccess: (newPost: FeedPost) => void;
-  onOpenChange?: (open: boolean) => void; // For dialog integration
+  onSubmitSuccess: (newPost: TextPostFeedItem | ImagePostFeedItem) => void;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export function CreatePostForm({ onSubmitSuccess, onOpenChange }: CreatePostFormProps) {
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const form = useForm<CreatePostFormData>({
     resolver: zodResolver(createPostSchema),
     defaultValues: {
       content: '',
-      postImageUrl: '',
+      imageFile: undefined,
     },
   });
 
-  const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = form;
+  const { register, handleSubmit, formState: { errors, isSubmitting }, reset, watch } = form;
+  const imageFileWatch = watch('imageFile');
+
+  React.useEffect(() => {
+    if (imageFileWatch && imageFileWatch.length > 0) {
+      const file = imageFileWatch[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImagePreview(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      }
+    } else {
+      setImagePreview(null);
+    }
+  }, [imageFileWatch]);
 
   const processSubmit: SubmitHandler<CreatePostFormData> = async (data) => {
-    const newPost: FeedPost = {
+    const commonData = {
       id: `post-${Date.now()}`,
-      candidateName: 'Current User (Anonymous)', 
-      candidateImageUrl: 'https://placehold.co/40x40.png?text=CU',
-      dataAiHintCandidate: 'person face',
       timestamp: new Date().toISOString(),
-      content: data.content,
-      postImageUrl: data.postImageUrl || undefined,
-      dataAiHintPost: data.postImageUrl ? 'user uploaded image' : undefined,
-      likes: 0,
-      comments: 0,
-      shares: 0,
+      creatorName: 'Current User', // Placeholder
+      creatorImageUrl: 'https://placehold.co/40x40.png?text=CU',
+      creatorDataAiHint: 'person face',
     };
-    
-    await new Promise(resolve => setTimeout(resolve, 500));
 
-    onSubmitSuccess(newPost);
+    if (data.imageFile && data.imageFile.length > 0 && imagePreview) {
+      const newImagePost: ImagePostFeedItem = {
+        ...commonData,
+        itemType: 'image_post',
+        content: data.content || '',
+        mediaUrl: imagePreview, // Using the base64 preview as the mediaUrl for client-side display
+        mediaDataAiHint: 'user uploaded image',
+      };
+      onSubmitSuccess(newImagePost);
+    } else if (data.content) {
+      const newTextPost: TextPostFeedItem = {
+        ...commonData,
+        itemType: 'text_post',
+        content: data.content,
+      };
+      onSubmitSuccess(newTextPost);
+    }
+
     reset();
-    onOpenChange?.(false); // Close dialog if this function is provided
+    setImagePreview(null);
+    onOpenChange?.(false);
   };
-  
-  // If not used in a dialog, Card wrapper is good.
-  // If used in a dialog, the dialog provides the "card" structure.
-  const FormContent = (
+
+  return (
     <form onSubmit={handleSubmit(processSubmit)} className="space-y-4">
       <div>
-        <Label htmlFor="postContent" className="mb-1 block">What's on your mind?</Label>
+        <Label htmlFor="postContent" className="mb-1 block">What's on your mind? (Optional if uploading image)</Label>
         <Textarea
           id="postContent"
           {...register('content')}
@@ -74,17 +103,23 @@ export function CreatePostForm({ onSubmitSuccess, onOpenChange }: CreatePostForm
         {errors.content && <p id="content-error" className="text-sm text-destructive mt-1">{errors.content.message}</p>}
       </div>
       <div>
-        <Label htmlFor="postImageUrl" className="mb-1 block">Image URL (Optional)</Label>
+        <Label htmlFor="imageFile" className="mb-1 block">Upload Image (Optional)</Label>
         <Input
-          id="postImageUrl"
-          {...register('postImageUrl')}
-          type="url"
-          placeholder="https://example.com/image.png"
-          aria-invalid={errors.postImageUrl ? "true" : "false"}
-          aria-describedby="imageUrl-error"
+          id="imageFile"
+          type="file"
+          accept="image/*"
+          {...register('imageFile')}
+          className="file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-muted file:text-muted-foreground hover:file:bg-primary/10"
         />
-        {errors.postImageUrl && <p id="imageUrl-error" className="text-sm text-destructive mt-1">{errors.postImageUrl.message}</p>}
+        {errors.imageFile && <p className="text-sm text-destructive mt-1">{errors.imageFile.message as string}</p>}
       </div>
+
+      {imagePreview && (
+        <div className="mt-2 rounded-md border overflow-hidden aspect-video relative">
+          <Image src={imagePreview} alt="Image preview" layout="fill" objectFit="contain" />
+        </div>
+      )}
+
       <Button type="submit" disabled={isSubmitting} className="w-full">
         {isSubmitting ? (
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -95,19 +130,4 @@ export function CreatePostForm({ onSubmitSuccess, onOpenChange }: CreatePostForm
       </Button>
     </form>
   );
-
-  if (!onOpenChange) {
-    return (
-      <Card className="mb-6 shadow-md rounded-lg">
-        <CardHeader>
-          <CardTitle className="text-lg">Create a New Post</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {FormContent}
-        </CardContent>
-      </Card>
-    );
-  }
-  
-  return FormContent;
 }

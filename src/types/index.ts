@@ -2,18 +2,18 @@
 export type Role = 'ADMIN' | 'CANDIDATE' | 'VOLUNTEER' | 'VOTER' | 'ANONYMOUS';
 
 export interface User {
-  uid: string; 
-  phone: string | null; 
-  email?: string | null; 
+  uid: string;
+  phone: string | null;
+  email?: string | null;
   role: Role;
   name?: string;
-  regionId?: string; 
-  photoURL?: string | null; 
+  regionId?: string;
+  photoURL?: string | null;
 }
 
 export interface Candidate {
   dataAiHint: string;
-  id: string; 
+  id: string;
   name: string;
   party: string;
   region: string;
@@ -23,22 +23,69 @@ export interface Candidate {
   profileBio?: string;
 }
 
-export interface FeedPost {
-  dataAiHintPost?: string; 
-  dataAiHintCandidate?: string; 
+interface BaseFeedItem {
   id: string;
-  // userId: string; // Temporarily removed as login is disabled
-  candidateName: string; 
-  candidateParty?: string; 
-  candidateRole?: string; 
-  candidateImageUrl?: string; 
+  timestamp: string; // ISO string
+  // Common fields for all feed items, like user who created it
+  creatorName: string; // Simplified for now, would be userId in a real app
+  creatorImageUrl?: string;
+  creatorDataAiHint?: string;
+}
+
+export interface TextPostFeedItem extends BaseFeedItem {
+  itemType: 'text_post';
+  content: string;
+}
+
+export interface ImagePostFeedItem extends BaseFeedItem {
+  itemType: 'image_post';
+  content?: string; // Optional caption
+  mediaUrl: string; // For uploaded image (object URL) or external image URL
+  mediaDataAiHint?: string;
+}
+
+export interface VideoPostFeedItem extends BaseFeedItem {
+  itemType: 'video_post';
+  content?: string; // Optional caption
+  mediaUrl: string; // For uploaded video (object URL)
+  mediaDataAiHint?: string;
+}
+
+export interface CampaignFeedItem extends BaseFeedItem {
+  itemType: 'campaign_created';
+  campaignName: string;
+  campaignLocation?: string;
+  campaignDescription?: string;
+}
+
+export interface PollFeedItem extends BaseFeedItem {
+  itemType: 'poll_created';
+  pollQuestion: string;
+  pollOptions?: { text: string }[];
+}
+
+export type FeedItem = TextPostFeedItem | ImagePostFeedItem | VideoPostFeedItem | CampaignFeedItem | PollFeedItem;
+
+
+// This FeedPost type is from the original mockData and homepage.
+// It will be replaced by the new FeedItem structure for the unified feed.
+// Keeping it for reference or if some parts of the app still use it temporarily.
+export interface OldFeedPost {
+  dataAiHintPost?: string;
+  dataAiHintCandidate?: string;
+  id: string;
+  candidateName: string;
+  candidateParty?: string;
+  candidateRole?: string;
+  candidateImageUrl?: string;
   timestamp: string; // ISO string or Firestore Timestamp
   content: string;
-  postImageUrl?: string; 
+  postImageUrl?: string;
   likes: number;
   comments: number;
   shares: number;
 }
+
 
 export interface ElectionEvent {
   id: string;
@@ -49,7 +96,7 @@ export interface ElectionEvent {
 }
 
 export interface Campaign {
-  dataAiHint?: string; 
+  dataAiHint?: string;
   id: string;
   name: string;
   party?: string;
@@ -62,27 +109,26 @@ export interface Campaign {
 
 export interface Report {
   id: string;
-  // userId: string; // Temporarily removed
   title: string;
   description: string;
   category: string;
   status: 'Submitted' | 'In Review' | 'Resolved' | 'Rejected';
-  dateSubmitted: string; 
-  isAnonymous: boolean; 
-  attachments?: { name: string; url: string }[]; 
+  dateSubmitted: string;
+  isAnonymous: boolean;
+  attachments?: { name: string; url: string }[];
 }
 
 export interface VolunteerSignup {
-  id: string; 
+  id: string;
   fullName: string;
-  email?: string; 
-  phone?: string; // Optional as per form
+  email?: string;
+  phone?: string;
   volunteerTarget: 'general' | 'candidate';
-  specificCandidateName?: string; 
+  specificCandidateName?: string;
   interests: string[];
   availability: string;
   message?: string;
-  submittedAt: string; 
+  submittedAt: string;
 }
 
 export interface PollOption {
@@ -94,9 +140,9 @@ export interface Poll {
   id: string;
   question: string;
   options: PollOption[];
-  creatorId: string; // For now, can be a mock ID or 'anonymous'
-  createdAt: string; // ISO string
-  regionId?: string; // Optional
+  creatorId: string;
+  createdAt: string;
+  regionId?: string;
 }
 
 
@@ -108,11 +154,11 @@ export interface FirestoreUser { // /users/{uid}
   name?: string;
   regionId?: string;
   photoURL?: string | null;
-  createdAt: string; 
+  createdAt: string;
 }
 
 export interface FirestoreRole { // /roles/{uid}
   uid: string;
   role: Role;
-  updatedAt: string; 
+  updatedAt: string;
 }
