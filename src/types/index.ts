@@ -113,16 +113,17 @@ export interface Campaign {
   category: 'Local' | 'State' | 'National';
 }
 
-export interface Report {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  status: 'Submitted' | 'In Review' | 'Resolved' | 'Rejected';
-  dateSubmitted: string;
-  isAnonymous: boolean;
-  attachments?: { name: string; url: string }[];
-}
+// Report type removed as the feature is deleted
+// export interface Report {
+//   id: string;
+//   title: string;
+//   description: string;
+//   category: string;
+//   status: 'Submitted' | 'In Review' | 'Resolved' | 'Rejected';
+//   dateSubmitted: string;
+//   isAnonymous: boolean;
+//   attachments?: { name: string; url: string }[];
+// }
 
 export interface VolunteerSignup {
   id: string;
@@ -164,3 +165,4 @@ export interface FirestoreRole {
   role: Role;
   updatedAt: string;
 }
+

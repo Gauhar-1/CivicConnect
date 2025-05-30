@@ -1,5 +1,6 @@
 
-import type { Candidate, FeedPost, ElectionEvent, Campaign, Report, Poll } from '@/types';
+import type { Candidate, FeedPost, ElectionEvent, Campaign, Poll } from '@/types';
+// Report type removed
 
 export const mockCandidates: Candidate[] = [
   {
@@ -150,26 +151,27 @@ export const mockCampaigns: Campaign[] = [
   },
 ];
 
-export const mockReports: Report[] = [
-    {
-        id: 'rep1',
-        title: 'Misleading Campaign Ad',
-        description: 'A TV advertisement for candidate X contains false claims about candidate Y\'s voting record.',
-        category: 'False Information',
-        status: 'In Review',
-        dateSubmitted: new Date(Date.now() - 86400000 * 2).toISOString(), // 2 days ago
-        isAnonymous: false,
-    },
-    {
-        id: 'rep2',
-        title: 'Voter Intimidation at Poll Site',
-        description: 'Observed individuals harassing voters at the Elm Street polling location.',
-        category: 'Election Process',
-        status: 'Submitted',
-        dateSubmitted: new Date(Date.now() - 86400000 * 1).toISOString(), // 1 day ago
-        isAnonymous: true,
-    }
-];
+// mockReports removed as the feature is deleted
+// export const mockReports: Report[] = [
+//     {
+//         id: 'rep1',
+//         title: 'Misleading Campaign Ad',
+//         description: 'A TV advertisement for candidate X contains false claims about candidate Y\'s voting record.',
+//         category: 'False Information',
+//         status: 'In Review',
+//         dateSubmitted: new Date(Date.now() - 86400000 * 2).toISOString(), // 2 days ago
+//         isAnonymous: false,
+//     },
+//     {
+//         id: 'rep2',
+//         title: 'Voter Intimidation at Poll Site',
+//         description: 'Observed individuals harassing voters at the Elm Street polling location.',
+//         category: 'Election Process',
+//         status: 'Submitted',
+//         dateSubmitted: new Date(Date.now() - 86400000 * 1).toISOString(), // 1 day ago
+//         isAnonymous: true,
+//     }
+// ];
 
 export const mockPolls: Poll[] = [];
 
@@ -180,3 +182,4 @@ export const getCandidateById = (id: string): Candidate | undefined =>
 // Helper to get a single campaign by ID
 export const getCampaignById = (id: string): Campaign | undefined =>
   mockCampaigns.find(campaign => campaign.id === id);
+
