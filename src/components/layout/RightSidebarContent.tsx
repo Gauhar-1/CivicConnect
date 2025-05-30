@@ -37,8 +37,8 @@ export function RightSidebarContent() {
       votes: Math.floor(Math.random() * 50), // Start with some mock votes for demo
     }));
 
-    // Add an "Undecided" option
-    pollOptions.push({ id: 'undecided', text: 'Undecided', votes: Math.floor(Math.random() * 20) });
+    // "Undecided" option is removed
+    // pollOptions.push({ id: 'undecided', text: 'Undecided', votes: Math.floor(Math.random() * 20) });
     
     let totalInitialVotes = pollOptions.reduce((sum, opt) => sum + opt.votes, 0);
 
@@ -115,7 +115,6 @@ export function RightSidebarContent() {
                   );
                 })}
               </div>
-              {/* Total votes display removed as per request */}
             </>
           )}
            {!electionPoll && !isLoadingPoll && (
