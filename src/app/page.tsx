@@ -11,6 +11,12 @@ import { mockFeedPosts as initialMockFeedPosts } from '@/lib/mockData';
 import type { FeedPost } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
 import { CreatePostForm } from '@/components/forms/CreatePostForm';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 function FeedPostCard({ post }: { post: FeedPost }) {
   return (
@@ -46,18 +52,58 @@ function FeedPostCard({ post }: { post: FeedPost }) {
         )}
       </CardContent>
       <CardFooter className="flex justify-around p-2 border-t">
-        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
-          <ThumbsUp className="mr-2 h-4 w-4" /> Like ({post.likes})
-        </Button>
-        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
-          <MessageCircle className="mr-2 h-4 w-4" /> Comment ({post.comments})
-        </Button>
-        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
-          <Share2 className="mr-2 h-4 w-4" /> Share ({post.shares})
-        </Button>
-        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive">
-          <Flag className="mr-2 h-4 w-4" /> Report
-        </Button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
+                <ThumbsUp className="h-5 w-5" />
+                <span className="sr-only">Like</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Like ({post.likes})</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
+                <MessageCircle className="h-5 w-5" />
+                <span className="sr-only">Comment</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Comment ({post.comments})</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
+                <Share2 className="h-5 w-5" />
+                <span className="sr-only">Share</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Share ({post.shares})</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <TooltipProvider>
+           <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
+                <Flag className="h-5 w-5" />
+                <span className="sr-only">Report</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Report</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </CardFooter>
     </Card>
   );
