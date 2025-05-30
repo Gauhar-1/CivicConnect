@@ -1,4 +1,5 @@
-import type { Candidate, FeedPost, ElectionEvent, Campaign, Report } from '@/types';
+
+import type { Candidate, FeedPost, ElectionEvent, Campaign, Report, Poll } from '@/types';
 
 export const mockCandidates: Candidate[] = [
   {
@@ -64,7 +65,6 @@ export const mockFeedPosts: FeedPost[] = [
     likes: 230,
     comments: 45,
     shares: 20,
-    dataAiHintPost: ''
   },
   {
     id: 'post3',
@@ -171,7 +171,8 @@ export const mockReports: Report[] = [
     }
 ];
 
+export const mockPolls: Poll[] = [];
+
 // Helper to get a single candidate by ID
 export const getCandidateById = (id: string): Candidate | undefined => 
   mockCandidates.find(candidate => candidate.id === id);
-

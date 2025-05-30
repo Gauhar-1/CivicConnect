@@ -1,13 +1,16 @@
+
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { ThumbsUp, MessageCircle, Share2, Flag, Award } from 'lucide-react';
-import { mockFeedPosts } from '@/lib/mockData';
+import { mockFeedPosts as initialMockFeedPosts } from '@/lib/mockData';
 import type { FeedPost } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
+import { CreatePostForm } from '@/components/forms/CreatePostForm';
 
 function FeedPostCard({ post }: { post: FeedPost }) {
   return (
@@ -23,7 +26,7 @@ function FeedPostCard({ post }: { post: FeedPost }) {
             {post.candidateParty && <Award className="ml-2 h-4 w-4 text-yellow-500" />}
           </CardTitle>
           <p className="text-xs text-muted-foreground">
-            {post.candidateRole} &bull; {formatDistanceToNow(new Date(post.timestamp), { addSuffix: true })}
+            {post.candidateRole || 'Community Member'} &bull; {formatDistanceToNow(new Date(post.timestamp), { addSuffix: true })}
           </p>
         </div>
       </CardHeader>
@@ -61,10 +64,18 @@ function FeedPostCard({ post }: { post: FeedPost }) {
 }
 
 export default function HomePage() {
+  const [feedPosts, setFeedPosts] = useState<FeedPost[]>(initialMockFeedPosts);
+
+  const handleCreatePost = (newPost: FeedPost) => {
+    setFeedPosts(prevPosts => [newPost, ...prevPosts]);
+  };
+
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Live Feed</h1>
-      {mockFeedPosts.map((post) => (
+      <CreatePostForm onSubmitSuccess={handleCreatePost} />
+      <h1 className="text-2xl font-bold mb-6 mt-8">Live Feed</h1>
+      {feedPosts.length === 0 && <p className="text-muted-foreground text-center py-4">No posts yet. Be the first to share something!</p>}
+      {feedPosts.map((post) => (
         <FeedPostCard key={post.id} post={post} />
       ))}
     </div>
