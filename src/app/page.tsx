@@ -8,11 +8,11 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
-  ThumbsUp, MessageCircle, Share2, Flag, Award,
-  Edit3, BarChart2, Search as CampaignIcon, Video as VideoIcon, PlusCircle
+  ThumbsUp, MessageCircle, Share2, Flag,
+  Edit3, BarChart2, Video as VideoIcon, PlusCircle
 } from 'lucide-react';
 import { mockFeedPosts as initialMockFeedPosts } from '@/lib/mockData';
-import type { FeedItem, TextPostFeedItem, ImagePostFeedItem, VideoPostFeedItem, CampaignFeedItem, PollFeedItem, Campaign, Poll, OldFeedPost } from '@/types';
+import type { FeedItem, TextPostFeedItem, ImagePostFeedItem, VideoPostFeedItem, CampaignFeedItem, PollFeedItem, PollOption as FeedPollOption, Campaign, Poll, OldFeedPost } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
 import {
   Tooltip,
@@ -23,20 +23,21 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { CreatePostForm } from '@/components/forms/CreatePostForm';
-// CreateCampaignForm import is no longer needed here
-// import { CreateCampaignForm } from '@/components/forms/CreateCampaignForm'; 
 import { CreatePollForm } from '@/components/forms/CreatePollForm';
 import { CreateVideoForm } from '@/components/forms/CreateVideoForm'; 
-import { Separator } from '@/components/ui/separator';
+import { Progress } from '@/components/ui/progress'; // Added for poll percentages
 
 
-function FeedItemCard({ item }: { item: FeedItem }) {
+interface FeedItemCardProps {
+  item: FeedItem;
+  onPollVote?: (pollId: string, optionId: string) => void;
+}
+
+function FeedItemCard({ item, onPollVote }: FeedItemCardProps) {
   const renderMedia = () => {
     if (item.itemType === 'image_post' && item.mediaUrl) {
       return (
@@ -83,16 +84,35 @@ function FeedItemCard({ item }: { item: FeedItem }) {
         );
       case 'poll_created':
         return (
-          <div className="text-sm mb-3 p-3 bg-secondary/30 rounded-md border">
-            <p className="font-semibold">New Poll Created: {item.pollQuestion}</p>
-            {item.pollOptions && item.pollOptions.length > 0 && (
-              <ul className="list-disc list-inside text-xs text-muted-foreground mt-1">
-                {item.pollOptions.slice(0,2).map(opt => <li key={opt.text}>{opt.text}</li>)}
-                {item.pollOptions.length > 2 && <li>...and more</li>}
-              </ul>
-            )}
-            {/* Placeholder for linking to a specific poll page if created */}
-            <Button variant="link" size="sm" className="px-0 h-auto mt-1 text-primary disabled:text-muted-foreground" disabled>View Poll</Button>
+          <div className="text-sm mb-3 p-3 space-y-3">
+            <p className="font-semibold text-base">{item.pollQuestion}</p>
+            <div className="space-y-2">
+              {item.pollOptions.map((option) => {
+                const percentage = item.totalVotes > 0 ? (option.votes / item.totalVotes) * 100 : 0;
+                return (
+                  <div key={option.id}>
+                    {item.userHasVoted ? (
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-xs">
+                          <span>{option.text}</span>
+                          <span>{option.votes} vote(s) ({percentage.toFixed(0)}%)</span>
+                        </div>
+                        <Progress value={percentage} className="h-3" />
+                      </div>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start"
+                        onClick={() => onPollVote?.(item.pollId, option.id)}
+                      >
+                        {option.text}
+                      </Button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            {item.userHasVoted && <p className="text-xs text-muted-foreground text-right mt-2">Total Votes: {item.totalVotes}</p>}
           </div>
         );
       default:
@@ -110,11 +130,8 @@ function FeedItemCard({ item }: { item: FeedItem }) {
         <div>
           <CardTitle className="text-base font-semibold flex items-center">
             {item.creatorName}
-            {/* Placeholder for candidate badge if needed */}
-            {/* <Award className="ml-2 h-4 w-4 text-yellow-500" /> */}
           </CardTitle>
           <p className="text-xs text-muted-foreground">
-            {/* Placeholder for role */}
             Posted {formatDistanceToNow(new Date(item.timestamp), { addSuffix: true })}
           </p>
         </div>
@@ -123,65 +140,66 @@ function FeedItemCard({ item }: { item: FeedItem }) {
         {renderContent()}
         {renderMedia()}
       </CardContent>
-      <CardFooter className="flex justify-around p-2 border-t">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
-                <ThumbsUp className="h-5 w-5" />
-                <span className="sr-only">Like</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Like (0)</p> {/* Placeholder likes */}
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
-                <MessageCircle className="h-5 w-5" />
-                <span className="sr-only">Comment</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Comment (0)</p> {/* Placeholder comments */}
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
-                <Share2 className="h-5 w-5" />
-                <span className="sr-only">Share</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Share (0)</p> {/* Placeholder shares */}
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-        <TooltipProvider>
-           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
-                <Flag className="h-5 w-5" />
-                <span className="sr-only">Report</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Report</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </CardFooter>
+      {item.itemType !== 'poll_created' && ( // Hide footer for polls as actions are inside content
+        <CardFooter className="flex justify-around p-2 border-t">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
+                  <ThumbsUp className="h-5 w-5" />
+                  <span className="sr-only">Like</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Like (0)</p> 
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
+                  <MessageCircle className="h-5 w-5" />
+                  <span className="sr-only">Comment</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Comment (0)</p> 
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
+                  <Share2 className="h-5 w-5" />
+                  <span className="sr-only">Share</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Share (0)</p> 
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
+                  <Flag className="h-5 w-5" />
+                  <span className="sr-only">Report</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Report</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </CardFooter>
+      )}
     </Card>
   );
 }
 
-// Convert OldFeedPost from mockData to new FeedItem structure
 const initialFeedItems: FeedItem[] = initialMockFeedPosts.map((post: OldFeedPost): FeedItem => {
   if (post.postImageUrl) {
     return {
@@ -211,7 +229,6 @@ const initialFeedItems: FeedItem[] = initialMockFeedPosts.map((post: OldFeedPost
 export default function HomePage() {
   const [feedItems, setFeedItems] = useState<FeedItem[]>(initialFeedItems);
   const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
-  // const [isCampaignDialogOpen, setIsCampaignDialogOpen] = useState(false); // Removed
   const [isPollDialogOpen, setIsPollDialogOpen] = useState(false);
   const [isVideoDialogOpen, setIsVideoDialogOpen] = useState(false);
 
@@ -225,24 +242,7 @@ export default function HomePage() {
     addNewFeedItem(newPost);
     setIsPostDialogOpen(false);
   };
-
-  // const handleCreateCampaign = (newCampaignData: Campaign) => { // Removed
-  //   const campaignFeedItem: CampaignFeedItem = {
-  //     id: `feed-camp-${newCampaignData.id}`,
-  //     timestamp: new Date().toISOString(),
-  //     itemType: 'campaign_created',
-  //     creatorName: 'Current User', 
-  //     creatorImageUrl: 'https://placehold.co/40x40.png?text=CU',
-  //     creatorDataAiHint: 'person face',
-  //     campaignId: newCampaignData.id, 
-  //     campaignName: newCampaignData.name,
-  //     campaignLocation: newCampaignData.location,
-  //     campaignDescription: newCampaignData.description,
-  //   };
-  //   addNewFeedItem(campaignFeedItem);
-  //   setIsCampaignDialogOpen(false);
-  // };
-
+  
   const handleCreatePoll = (newPollData: Poll) => {
      const pollFeedItem: PollFeedItem = {
       id: `feed-poll-${newPollData.id}`,
@@ -253,7 +253,9 @@ export default function HomePage() {
       creatorDataAiHint: 'person face',
       pollId: newPollData.id, 
       pollQuestion: newPollData.question,
-      pollOptions: newPollData.options.map(opt => ({ text: opt.text })),
+      pollOptions: newPollData.options.map(opt => ({ ...opt, votes: 0 })), // Initialize votes
+      totalVotes: 0,
+      userHasVoted: false,
     };
     addNewFeedItem(pollFeedItem);
     setIsPollDialogOpen(false);
@@ -262,6 +264,25 @@ export default function HomePage() {
   const handleCreateVideo = (newVideo: VideoPostFeedItem) => {
     addNewFeedItem(newVideo);
     setIsVideoDialogOpen(false);
+  };
+
+  const handlePollVote = (pollId: string, optionId: string) => {
+    setFeedItems(prevItems =>
+      prevItems.map(item => {
+        if (item.itemType === 'poll_created' && item.pollId === pollId && !item.userHasVoted) {
+          const newOptions = item.pollOptions.map(opt =>
+            opt.id === optionId ? { ...opt, votes: opt.votes + 1 } : opt
+          );
+          return {
+            ...item,
+            pollOptions: newOptions,
+            totalVotes: item.totalVotes + 1,
+            userHasVoted: true,
+          };
+        }
+        return item;
+      })
+    );
   };
 
 
@@ -293,21 +314,6 @@ export default function HomePage() {
             </Tooltip>
           </TooltipProvider>
 
-          {/* Campaign Creation Button Removed */}
-          {/* 
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" onClick={() => setIsCampaignDialogOpen(true)} className="flex flex-col h-auto p-2">
-                  <CampaignIcon className="h-6 w-6 text-green-500" />
-                  <span className="text-xs mt-1">Campaign</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent><p>Start a Campaign</p></TooltipContent>
-            </Tooltip>
-          </TooltipProvider> 
-          */}
-
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -336,16 +342,6 @@ export default function HomePage() {
         </DialogContent>
       </Dialog>
       
-      {/* Campaign Creation Dialog Removed */}
-      {/* 
-      <Dialog open={isCampaignDialogOpen} onOpenChange={setIsCampaignDialogOpen}>
-        <DialogContent className="sm:max-w-[480px] overflow-y-auto max-h-[90vh]">
-          <DialogHeader><DialogTitle>Create a New Campaign</DialogTitle></DialogHeader>
-          <CreateCampaignForm onSubmitSuccess={handleCreateCampaign} onOpenChange={setIsCampaignDialogOpen} />
-        </DialogContent>
-      </Dialog> 
-      */}
-
       <Dialog open={isPollDialogOpen} onOpenChange={setIsPollDialogOpen}>
         <DialogContent className="sm:max-w-[480px] overflow-y-auto max-h-[90vh]">
           <DialogHeader><DialogTitle>Create a New Poll</DialogTitle></DialogHeader>
@@ -355,10 +351,9 @@ export default function HomePage() {
 
 
       <h1 className="text-2xl font-bold mb-6 mt-8">Live Feed</h1>
-      <p className="text-muted-foreground mb-4">This is a placeholder for the live feed. Content creation UI has been moved above.</p>
-      {feedItems.length === 0 && <p className="text-muted-foreground text-center py-4">No items in the feed yet. Be the first to share something!</p>}
+      {feedItems.length === 0 && <p className="text-muted-foreground text-center py-4">The feed is empty. Try creating a post or poll!</p>}
       {feedItems.map((item) => (
-        <FeedItemCard key={item.id} item={item} />
+        <FeedItemCard key={item.id} item={item} onPollVote={handlePollVote} />
       ))}
     </div>
   );

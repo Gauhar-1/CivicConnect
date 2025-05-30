@@ -26,8 +26,7 @@ export interface Candidate {
 interface BaseFeedItem {
   id: string;
   timestamp: string; // ISO string
-  // Common fields for all feed items, like user who created it
-  creatorName: string; // Simplified for now, would be userId in a real app
+  creatorName: string; 
   creatorImageUrl?: string;
   creatorDataAiHint?: string;
 }
@@ -39,39 +38,44 @@ export interface TextPostFeedItem extends BaseFeedItem {
 
 export interface ImagePostFeedItem extends BaseFeedItem {
   itemType: 'image_post';
-  content?: string; // Optional caption
-  mediaUrl: string; // For uploaded image (object URL) or external image URL
+  content?: string; 
+  mediaUrl: string; 
   mediaDataAiHint?: string;
 }
 
 export interface VideoPostFeedItem extends BaseFeedItem {
   itemType: 'video_post';
-  content?: string; // Optional caption
-  mediaUrl: string; // For uploaded video (object URL)
+  content?: string; 
+  mediaUrl: string; 
   mediaDataAiHint?: string;
 }
 
 export interface CampaignFeedItem extends BaseFeedItem {
   itemType: 'campaign_created';
-  campaignId: string; // Added to link to the specific campaign
+  campaignId: string; 
   campaignName: string;
   campaignLocation?: string;
   campaignDescription?: string;
 }
 
+export interface PollOption {
+  id: string; 
+  text: string;
+  votes: number;
+}
+
 export interface PollFeedItem extends BaseFeedItem {
   itemType: 'poll_created';
-  pollId: string; // Added to link to a specific poll if a poll page exists
+  pollId: string; 
   pollQuestion: string;
-  pollOptions?: { text: string }[];
+  pollOptions: PollOption[]; 
+  totalVotes: number;
+  userHasVoted?: boolean;
 }
 
 export type FeedItem = TextPostFeedItem | ImagePostFeedItem | VideoPostFeedItem | CampaignFeedItem | PollFeedItem;
 
 
-// This FeedPost type is from the original mockData and homepage.
-// It will be replaced by the new FeedItem structure for the unified feed.
-// Keeping it for reference or if some parts of the app still use it temporarily.
 export interface OldFeedPost {
   dataAiHintPost?: string;
   dataAiHintCandidate?: string;
@@ -80,7 +84,7 @@ export interface OldFeedPost {
   candidateParty?: string;
   candidateRole?: string;
   candidateImageUrl?: string;
-  timestamp: string; // ISO string or Firestore Timestamp
+  timestamp: string; 
   content: string;
   postImageUrl?: string;
   likes: number;
@@ -133,23 +137,19 @@ export interface VolunteerSignup {
   submittedAt: string;
 }
 
-export interface PollOption {
-  id: string;
-  text: string;
-  votes: number;
-}
+// This Poll type is what CreatePollForm works with.
+// PollOption here matches the one used in PollFeedItem.
 export interface Poll {
   id: string;
   question: string;
-  options: PollOption[];
+  options: PollOption[]; // options here should align with the structure needed by PollFeedItem
   creatorId: string;
   createdAt: string;
   regionId?: string;
 }
 
 
-// Firestore specific types (matching collection names)
-export interface FirestoreUser { // /users/{uid}
+export interface FirestoreUser { 
   uid: string;
   phone: string | null;
   email?: string | null;
@@ -159,7 +159,7 @@ export interface FirestoreUser { // /users/{uid}
   createdAt: string;
 }
 
-export interface FirestoreRole { // /roles/{uid}
+export interface FirestoreRole { 
   uid: string;
   role: Role;
   updatedAt: string;
