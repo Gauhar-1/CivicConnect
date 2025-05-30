@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import Link from 'next/link'; // Added Link
 import { RequiredAuth } from '@/components/auth/RequiredAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -12,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { mockMonitoredVolunteers } from '@/lib/mockData';
 import type { MonitoredVolunteer, GroupChat } from '@/types';
-import { LayoutDashboard, Users, Filter, Search as SearchIcon, MessageSquarePlus } from 'lucide-react';
+import { LayoutDashboard, Users, Filter, Search as SearchIcon, MessageSquarePlus, Eye } from 'lucide-react'; // Added Eye
 import { CreateGroupChatForm, type CreateGroupChatFormData } from '@/components/forms/CreateGroupChatForm';
 
 const interestLabels: { [key: string]: string } = {
@@ -47,7 +48,7 @@ export default function CandidateDashboardPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [interestFilter, setInterestFilter] = useState('all');
   const [isCreateGroupChatOpen, setIsCreateGroupChatOpen] = useState(false);
-  const [createdGroupChats, setCreatedGroupChats] = useState<GroupChat[]>([]); // For now, just store locally
+  const [createdGroupChats, setCreatedGroupChats] = useState<GroupChat[]>([]); 
 
   const uniqueInterests = useMemo(() => {
     const allInterests = new Set<string>();
@@ -70,13 +71,13 @@ export default function CandidateDashboardPage() {
     const newGroupChat: GroupChat = {
       id: `gc-${Date.now()}`,
       name: formData.groupName,
-      candidateId: 'current-candidate-id', // Placeholder
+      candidateId: 'current-candidate-id', 
       volunteerMemberIds: formData.volunteerIds,
       createdAt: new Date().toISOString(),
     };
     setCreatedGroupChats(prev => [...prev, newGroupChat]);
     console.log('New Group Chat Created:', newGroupChat);
-    setIsCreateGroupChatOpen(false); // Close dialog
+    setIsCreateGroupChatOpen(false); 
   };
 
   return (
@@ -101,7 +102,7 @@ export default function CandidateDashboardPage() {
                 </DialogDescription>
                 </DialogHeader>
                 <CreateGroupChatForm
-                    volunteers={volunteers.filter(v => v.status === 'Active')} // Pass only active volunteers
+                    volunteers={volunteers.filter(v => v.status === 'Active')} 
                     onSubmitSuccess={handleCreateGroupChat}
                     onOpenChange={setIsCreateGroupChatOpen}
                 />
@@ -214,18 +215,26 @@ export default function CandidateDashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Placeholder for displaying created group chats */}
+        
         {createdGroupChats.length > 0 && (
             <Card className="shadow-md mt-6">
                 <CardHeader>
                     <CardTitle>Created Group Chats</CardTitle>
-                    <CardDescription>Overview of group chats you've initiated.</CardDescription>
+                    <CardDescription>Overview of group chats you've initiated. Click to view (placeholder).</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <ul className="space-y-2">
                         {createdGroupChats.map(chat => (
-                            <li key={chat.id} className="text-sm p-2 border rounded-md">
-                                <span className="font-semibold">{chat.name}</span> ({chat.volunteerMemberIds.length} members)
+                            <li key={chat.id} className="text-sm p-3 border rounded-md hover:bg-muted/50 transition-colors">
+                                <Link href={`/chat/${chat.id}?name=${encodeURIComponent(chat.name)}`} legacyBehavior>
+                                  <a className="flex justify-between items-center">
+                                    <div>
+                                      <span className="font-semibold">{chat.name}</span>
+                                      <span className="text-muted-foreground"> ({chat.volunteerMemberIds.length} member(s))</span>
+                                    </div>
+                                    <Eye className="h-4 w-4 text-primary" />
+                                  </a>
+                                </Link>
                             </li>
                         ))}
                     </ul>
