@@ -7,10 +7,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { mockMonitoredVolunteers } from '@/lib/mockData';
-import type { MonitoredVolunteer } from '@/types';
-import { LayoutDashboard, Users, Filter, Search as SearchIcon } from 'lucide-react';
+import type { MonitoredVolunteer, GroupChat } from '@/types';
+import { LayoutDashboard, Users, Filter, Search as SearchIcon, MessageSquarePlus } from 'lucide-react';
+import { CreateGroupChatForm, type CreateGroupChatFormData } from '@/components/forms/CreateGroupChatForm';
 
 const interestLabels: { [key: string]: string } = {
   canvassing: 'Canvassing',
@@ -22,7 +25,7 @@ const interestLabels: { [key: string]: string } = {
 };
 
 function getInterestLabel(interestKey: string): string {
-  return interestLabels[interestKey] || interestKey;
+  return interestLabels[interestKey] || interestKey.charAt(0).toUpperCase() + interestKey.slice(1).replace(/_/g, ' ');
 }
 
 function getStatusColor(status: MonitoredVolunteer['status']): string {
@@ -43,6 +46,8 @@ export default function CandidateDashboardPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [interestFilter, setInterestFilter] = useState('all');
+  const [isCreateGroupChatOpen, setIsCreateGroupChatOpen] = useState(false);
+  const [createdGroupChats, setCreatedGroupChats] = useState<GroupChat[]>([]); // For now, just store locally
 
   const uniqueInterests = useMemo(() => {
     const allInterests = new Set<string>();
@@ -61,15 +66,50 @@ export default function CandidateDashboardPage() {
     });
   }, [volunteers, searchTerm, statusFilter, interestFilter]);
 
+  const handleCreateGroupChat = (formData: CreateGroupChatFormData) => {
+    const newGroupChat: GroupChat = {
+      id: `gc-${Date.now()}`,
+      name: formData.groupName,
+      candidateId: 'current-candidate-id', // Placeholder
+      volunteerMemberIds: formData.volunteerIds,
+      createdAt: new Date().toISOString(),
+    };
+    setCreatedGroupChats(prev => [...prev, newGroupChat]);
+    console.log('New Group Chat Created:', newGroupChat);
+    setIsCreateGroupChatOpen(false); // Close dialog
+  };
+
   return (
     <RequiredAuth allowedRoles={['CANDIDATE']} redirectTo='/'>
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold flex items-center">
-          <LayoutDashboard className="mr-3 h-7 w-7 text-primary" />
-          Candidate Dashboard
-        </h1>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <h1 className="text-2xl font-bold flex items-center">
+            <LayoutDashboard className="mr-3 h-7 w-7 text-primary" />
+            Candidate Dashboard
+            </h1>
+            <Dialog open={isCreateGroupChatOpen} onOpenChange={setIsCreateGroupChatOpen}>
+            <DialogTrigger asChild>
+                <Button>
+                <MessageSquarePlus className="mr-2 h-4 w-4" /> Create Group Chat
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                <DialogTitle>Create New Group Chat</DialogTitle>
+                <DialogDescription>
+                    Organize volunteers by creating targeted group chats based on their interests.
+                </DialogDescription>
+                </DialogHeader>
+                <CreateGroupChatForm
+                    volunteers={volunteers.filter(v => v.status === 'Active')} // Pass only active volunteers
+                    onSubmitSuccess={handleCreateGroupChat}
+                    onOpenChange={setIsCreateGroupChatOpen}
+                />
+            </DialogContent>
+            </Dialog>
+        </div>
         <p className="text-muted-foreground">
-          Monitor and manage volunteers for your campaign.
+          Monitor volunteers, manage communications, and organize your campaign efforts.
         </p>
 
         <Card className="shadow-md">
@@ -78,7 +118,7 @@ export default function CandidateDashboardPage() {
               <Users className="mr-2 h-5 w-5" />
               Volunteer Roster
             </CardTitle>
-            <CardDescription>View and filter your volunteer signups.</CardDescription>
+            <CardDescription>View and filter your volunteer signups. Select active volunteers to add to group chats.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="mb-4 grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-lg bg-card">
@@ -139,9 +179,9 @@ export default function CandidateDashboardPage() {
                         <TableCell className="hidden md:table-cell">{volunteer.phone || 'N/A'}</TableCell>
                         <TableCell>
                           <div className="flex flex-wrap gap-1">
-                            {volunteer.interests.map(interest => (
-                              <Badge key={interest} variant="secondary" className="text-xs">
-                                {getInterestLabel(interest)}
+                            {volunteer.interests.map(interestKey => (
+                              <Badge key={interestKey} variant="secondary" className="text-xs">
+                                {getInterestLabel(interestKey)}
                               </Badge>
                             ))}
                           </div>
@@ -168,11 +208,31 @@ export default function CandidateDashboardPage() {
             </div>
              {filteredVolunteers.length > 0 && (
                 <p className="text-sm text-muted-foreground mt-4">
-                    Displaying {filteredVolunteers.length} of {volunteers.length} volunteers.
+                    Displaying {filteredVolunteers.length} of {volunteers.length} total volunteers.
                 </p>
             )}
           </CardContent>
         </Card>
+
+        {/* Placeholder for displaying created group chats */}
+        {createdGroupChats.length > 0 && (
+            <Card className="shadow-md mt-6">
+                <CardHeader>
+                    <CardTitle>Created Group Chats</CardTitle>
+                    <CardDescription>Overview of group chats you've initiated.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <ul className="space-y-2">
+                        {createdGroupChats.map(chat => (
+                            <li key={chat.id} className="text-sm p-2 border rounded-md">
+                                <span className="font-semibold">{chat.name}</span> ({chat.volunteerMemberIds.length} members)
+                            </li>
+                        ))}
+                    </ul>
+                </CardContent>
+            </Card>
+        )}
+
       </div>
     </RequiredAuth>
   );

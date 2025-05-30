@@ -129,20 +129,24 @@ export interface VolunteerSignup {
 
 export interface MonitoredVolunteer extends VolunteerSignup {
   status: 'Active' | 'Pending Review' | 'Inactive';
-  // We could add assignedCandidateId here if we were to filter volunteers per candidate.
-  // For now, the dashboard will show all monitored volunteers.
 }
 
 
-// This Poll type is what CreatePollForm works with.
-// PollOption here matches the one used in PollFeedItem.
 export interface Poll {
   id: string;
   question: string;
-  options: PollOption[]; // options here should align with the structure needed by PollFeedItem
+  options: PollOption[]; 
   creatorId: string;
   createdAt: string;
   regionId?: string;
+}
+
+export interface GroupChat {
+  id: string;
+  name: string;
+  candidateId: string; // Assuming a candidate creates/owns the chat
+  volunteerMemberIds: string[];
+  createdAt: string;
 }
 
 
