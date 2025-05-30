@@ -225,6 +225,8 @@ export default function HomePage() {
       timestamp: new Date().toISOString(),
       itemType: 'campaign_created',
       creatorName: 'Current User', // Placeholder
+      creatorImageUrl: 'https://placehold.co/40x40.png?text=CU',
+      creatorDataAiHint: 'person face',
       campaignName: newCampaignData.name,
       campaignLocation: newCampaignData.location,
       campaignDescription: newCampaignData.description,
@@ -241,6 +243,8 @@ export default function HomePage() {
       timestamp: new Date().toISOString(),
       itemType: 'poll_created',
       creatorName: 'Current User', // Placeholder
+      creatorImageUrl: 'https://placehold.co/40x40.png?text=CU',
+      creatorDataAiHint: 'person face',
       pollQuestion: newPollData.question,
       pollOptions: newPollData.options.map(opt => ({ text: opt.text })),
     };
@@ -310,28 +314,28 @@ export default function HomePage() {
       </Card>
 
       <Dialog open={isPostDialogOpen} onOpenChange={setIsPostDialogOpen}>
-        <DialogContent className="sm:max-w-[480px]">
+        <DialogContent className="sm:max-w-[480px] overflow-y-auto max-h-[90vh]">
           <DialogHeader><DialogTitle>Create a New Post</DialogTitle></DialogHeader>
           <CreatePostForm onSubmitSuccess={handleCreatePost} onOpenChange={setIsPostDialogOpen} />
         </DialogContent>
       </Dialog>
 
       <Dialog open={isVideoDialogOpen} onOpenChange={setIsVideoDialogOpen}>
-        <DialogContent className="sm:max-w-[520px]"> {/* Slightly wider for video preview */}
+        <DialogContent className="sm:max-w-[520px] overflow-y-auto max-h-[90vh]"> {/* Slightly wider for video preview */}
           <DialogHeader><DialogTitle>Upload a Video</DialogTitle></DialogHeader>
           <CreateVideoForm onSubmitSuccess={handleCreateVideo} onOpenChange={setIsVideoDialogOpen} />
         </DialogContent>
       </Dialog>
       
       <Dialog open={isCampaignDialogOpen} onOpenChange={setIsCampaignDialogOpen}>
-        <DialogContent className="sm:max-w-[480px]">
+        <DialogContent className="sm:max-w-[480px] overflow-y-auto max-h-[90vh]">
           <DialogHeader><DialogTitle>Create a New Campaign</DialogTitle></DialogHeader>
           <CreateCampaignForm onSubmitSuccess={handleCreateCampaign} onOpenChange={setIsCampaignDialogOpen} />
         </DialogContent>
       </Dialog>
 
       <Dialog open={isPollDialogOpen} onOpenChange={setIsPollDialogOpen}>
-        <DialogContent className="sm:max-w-[480px]">
+        <DialogContent className="sm:max-w-[480px] overflow-y-auto max-h-[90vh]">
           <DialogHeader><DialogTitle>Create a New Poll</DialogTitle></DialogHeader>
           <CreatePollForm onSubmitSuccess={handleCreatePoll} onOpenChange={setIsPollDialogOpen} />
         </DialogContent>
