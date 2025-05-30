@@ -1,6 +1,7 @@
 
 'use client';
 
+import * as React from 'react';
 import { useForm, type SubmitHandler, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -9,8 +10,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, PlusCircle } from 'lucide-react';
+import { Loader2, PlusCircle, Image as ImageIcon } from 'lucide-react'; // Added ImageIcon
 import type { Campaign } from '@/types';
+import Image from 'next/image'; // For image preview
 
 const campaignCategories = ['Local', 'State', 'National'] as const;
 
@@ -19,7 +21,7 @@ const createCampaignSchema = z.object({
   party: z.string().max(50).optional(),
   description: z.string().min(10, 'Description must be at least 10 characters.').max(1000),
   location: z.string().min(2, 'Location must be at least 2 characters.').max(100),
-  imageUrl: z.string().url('Please enter a valid image URL.').optional().or(z.literal('')),
+  imageFile: z.custom<FileList>().optional(), // Changed from imageUrl to imageFile
   category: z.enum(campaignCategories, { required_error: 'Please select a category.' }),
 });
 
@@ -31,6 +33,7 @@ interface CreateCampaignFormProps {
 }
 
 export function CreateCampaignForm({ onSubmitSuccess, onOpenChange }: CreateCampaignFormProps) {
+  const [imagePreview, setImagePreview] = React.useState<string | null>(null);
   const form = useForm<CreateCampaignFormData>({
     resolver: zodResolver(createCampaignSchema),
     defaultValues: {
@@ -38,12 +41,29 @@ export function CreateCampaignForm({ onSubmitSuccess, onOpenChange }: CreateCamp
       party: '',
       description: '',
       location: '',
-      imageUrl: '',
+      imageFile: undefined,
       category: undefined,
     },
   });
 
-  const { register, handleSubmit, control, formState: { errors, isSubmitting }, reset } = form;
+  const { register, handleSubmit, control, formState: { errors, isSubmitting }, reset, watch } = form;
+
+  const imageFileWatch = watch('imageFile');
+
+  React.useEffect(() => {
+    if (imageFileWatch && imageFileWatch.length > 0) {
+      const file = imageFileWatch[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImagePreview(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      }
+    } else {
+      setImagePreview(null);
+    }
+  }, [imageFileWatch]);
 
   const processSubmit: SubmitHandler<CreateCampaignFormData> = async (data) => {
     const newCampaign: Campaign = {
@@ -52,13 +72,14 @@ export function CreateCampaignForm({ onSubmitSuccess, onOpenChange }: CreateCamp
       party: data.party || undefined,
       description: data.description,
       location: data.location,
-      imageUrl: data.imageUrl || 'https://placehold.co/300x200.png', // Default placeholder
-      dataAiHint: data.imageUrl ? 'campaign image' : 'campaign event',
+      imageUrl: imagePreview || 'https://placehold.co/300x200.png',
+      dataAiHint: imagePreview ? 'user uploaded campaign image' : 'campaign event',
       category: data.category,
       popularityScore: Math.floor(Math.random() * 50) + 20, // Mock popularity
     };
     onSubmitSuccess(newCampaign);
     reset();
+    setImagePreview(null);
     onOpenChange?.(false);
   };
 
@@ -85,10 +106,23 @@ export function CreateCampaignForm({ onSubmitSuccess, onOpenChange }: CreateCamp
         {errors.location && <p className="text-sm text-destructive mt-1">{errors.location.message}</p>}
       </div>
       <div>
-        <Label htmlFor="campaignImageUrl">Image URL (Optional)</Label>
-        <Input id="campaignImageUrl" {...register('imageUrl')} type="url" placeholder="https://example.com/campaign-banner.png" />
-        {errors.imageUrl && <p className="text-sm text-destructive mt-1">{errors.imageUrl.message}</p>}
+        <Label htmlFor="campaignImageFile">Campaign Image (Optional)</Label>
+        <Input
+          id="campaignImageFile"
+          type="file"
+          accept="image/*"
+          {...register('imageFile')}
+          className="file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-muted file:text-muted-foreground hover:file:bg-primary/10"
+        />
+        {errors.imageFile && <p className="text-sm text-destructive mt-1">{errors.imageFile.message as string}</p>}
       </div>
+
+      {imagePreview && (
+        <div className="mt-2 rounded-md border overflow-hidden aspect-[3/2] relative"> {/* Aspect ratio 3:2 */}
+          <Image src={imagePreview} alt="Campaign image preview" layout="fill" objectFit="cover" />
+        </div>
+      )}
+
       <div>
         <Label htmlFor="campaignCategory">Category</Label>
         <Controller
