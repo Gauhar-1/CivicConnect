@@ -12,11 +12,11 @@ import {
   SidebarMenuButton,
   SidebarFooter,
 } from '@/components/ui/sidebar';
-import { NAV_LINKS, ADMIN_NAV_LINK } from '@/lib/constants';
+import { NAV_LINKS } from '@/lib/constants'; // ADMIN_NAV_LINK removed
 import { Button } from '@/components/ui/button';
 import { LogOut, Vote } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { ShowIfAuth } from '../auth/RequiredAuth';
+// import { ShowIfAuth } from '../auth/RequiredAuth'; // Admin link removed
 
 export function LeftSidebarNav() {
   const pathname = usePathname();
@@ -42,7 +42,8 @@ export function LeftSidebarNav() {
               </Link>
             </SidebarMenuItem>
           ))}
-          <ShowIfAuth roles={['ADMIN']}>
+          {/* Admin link removed as login is disabled for now */}
+          {/* <ShowIfAuth roles={['ADMIN']}>
             <SidebarMenuItem>
                 <Link href={ADMIN_NAV_LINK.href} legacyBehavior passHref>
                     <SidebarMenuButton
@@ -55,16 +56,17 @@ export function LeftSidebarNav() {
                     </SidebarMenuButton>
                 </Link>
             </SidebarMenuItem>
-          </ShowIfAuth>
+          </ShowIfAuth> */}
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter className="p-4">
-       {user && (
+       {/* Logout button removed as login is disabled */}
+       {/* {user && (
           <Button variant="ghost" className="w-full justify-start gap-2" onClick={logout}>
             <LogOut className="h-5 w-5" />
             <span className="group-data-[collapsible=icon]:hidden">Logout</span>
           </Button>
-        )}
+        )} */}
       </SidebarFooter>
     </Sidebar>
   );

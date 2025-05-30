@@ -16,10 +16,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { HideIfAuth } from '../auth/RequiredAuth'; // Keep HideIfAuth
+// import { HideIfAuth } from '../auth/RequiredAuth'; // Login button removed for now
 
 export function AppHeader() {
-  const { user, logout, isLoading } = useAuth(); // user is now AppUser or null
+  const { user, logout, isLoading } = useAuth(); 
 
   const getUserInitials = (name?: string, email?: string | null) => {
     if (name) {
@@ -48,7 +48,8 @@ export function AppHeader() {
       </div>
       
       <div className="flex items-center gap-4">
-        {isLoading ? (
+        {/* Login functionality removed for now */}
+        {/* {isLoading ? (
           <div className="h-10 w-10 rounded-full bg-muted animate-pulse" />
         ) : user ? (
           <DropdownMenu>
@@ -75,7 +76,7 @@ export function AppHeader() {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => {/* TODO: Profile Page Link to /profile or /users/[uid] */}}>
+              <DropdownMenuItem onClick={() => {}}>
                 <User className="mr-2 h-4 w-4" />
                 <span>Profile</span>
               </DropdownMenuItem>
@@ -87,7 +88,7 @@ export function AppHeader() {
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
-          <HideIfAuth>
+          <HideIfAuth> 
             <Link href="/login" passHref legacyBehavior>
               <Button variant="outline">
                 <LogIn className="mr-2 h-4 w-4" />
@@ -95,7 +96,7 @@ export function AppHeader() {
               </Button>
             </Link>
           </HideIfAuth>
-        )}
+        )} */}
       </div>
     </header>
   );

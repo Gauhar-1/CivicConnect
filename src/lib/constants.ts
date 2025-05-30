@@ -18,11 +18,12 @@ export const NAV_LINKS: NavLink[] = [
   { href: '/volunteer-signup', label: 'Volunteer Signup', icon: HandHeart },
 ];
 
-export const ADMIN_NAV_LINK: NavLink = {
-  href: '/admin',
-  label: 'Admin Panel',
-  icon: ShieldCheck,
-};
+// Admin nav link removed as login is disabled for now
+// export const ADMIN_NAV_LINK: NavLink = {
+//   href: '/admin',
+//   label: 'Admin Panel',
+//   icon: ShieldCheck,
+// };
 
 export const APP_NAME = 'CivicConnect';
 export const APP_ICON = Vote;
