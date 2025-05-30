@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Send, Loader2 } from 'lucide-react'; // Added Loader2 for submitting state
+import { Send, Loader2 } from 'lucide-react'; 
 import type { FeedPost } from '@/types';
 
 const createPostSchema = z.object({
@@ -21,9 +21,10 @@ type CreatePostFormData = z.infer<typeof createPostSchema>;
 
 interface CreatePostFormProps {
   onSubmitSuccess: (newPost: FeedPost) => void;
+  onOpenChange?: (open: boolean) => void; // For dialog integration
 }
 
-export function CreatePostForm({ onSubmitSuccess }: CreatePostFormProps) {
+export function CreatePostForm({ onSubmitSuccess, onOpenChange }: CreatePostFormProps) {
   const form = useForm<CreatePostFormData>({
     resolver: zodResolver(createPostSchema),
     defaultValues: {
@@ -35,11 +36,9 @@ export function CreatePostForm({ onSubmitSuccess }: CreatePostFormProps) {
   const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = form;
 
   const processSubmit: SubmitHandler<CreatePostFormData> = async (data) => {
-    // In a real app, this would call a server action.
-    // For now, we simulate and update client-side.
     const newPost: FeedPost = {
       id: `post-${Date.now()}`,
-      candidateName: 'Current User (Anonymous)', // Placeholder as login is disabled
+      candidateName: 'Current User (Anonymous)', 
       candidateImageUrl: 'https://placehold.co/40x40.png?text=CU',
       dataAiHintCandidate: 'person face',
       timestamp: new Date().toISOString(),
@@ -51,54 +50,64 @@ export function CreatePostForm({ onSubmitSuccess }: CreatePostFormProps) {
       shares: 0,
     };
     
-    // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 500));
 
     onSubmitSuccess(newPost);
     reset();
+    onOpenChange?.(false); // Close dialog if this function is provided
   };
-
-  return (
-    <Card className="mb-6 shadow-md rounded-lg">
-      <CardHeader>
-        <CardTitle className="text-lg">Create a New Post</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit(processSubmit)} className="space-y-4">
-          <div>
-            <Label htmlFor="postContent" className="mb-1 block">What's on your mind?</Label>
-            <Textarea
-              id="postContent"
-              {...register('content')}
-              placeholder="Share an update, news, or an announcement..."
-              className="min-h-[100px]"
-              aria-invalid={errors.content ? "true" : "false"}
-              aria-describedby="content-error"
-            />
-            {errors.content && <p id="content-error" className="text-sm text-destructive mt-1">{errors.content.message}</p>}
-          </div>
-          <div>
-            <Label htmlFor="postImageUrl" className="mb-1 block">Image URL (Optional)</Label>
-            <Input
-              id="postImageUrl"
-              {...register('postImageUrl')}
-              type="url"
-              placeholder="https://example.com/image.png"
-              aria-invalid={errors.postImageUrl ? "true" : "false"}
-              aria-describedby="imageUrl-error"
-            />
-            {errors.postImageUrl && <p id="imageUrl-error" className="text-sm text-destructive mt-1">{errors.postImageUrl.message}</p>}
-          </div>
-          <Button type="submit" disabled={isSubmitting} className="w-full">
-            {isSubmitting ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Send className="mr-2 h-4 w-4" />
-            )}
-            {isSubmitting ? 'Posting...' : 'Create Post'}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+  
+  // If not used in a dialog, Card wrapper is good.
+  // If used in a dialog, the dialog provides the "card" structure.
+  const FormContent = (
+    <form onSubmit={handleSubmit(processSubmit)} className="space-y-4">
+      <div>
+        <Label htmlFor="postContent" className="mb-1 block">What's on your mind?</Label>
+        <Textarea
+          id="postContent"
+          {...register('content')}
+          placeholder="Share an update, news, or an announcement..."
+          className="min-h-[100px]"
+          aria-invalid={errors.content ? "true" : "false"}
+          aria-describedby="content-error"
+        />
+        {errors.content && <p id="content-error" className="text-sm text-destructive mt-1">{errors.content.message}</p>}
+      </div>
+      <div>
+        <Label htmlFor="postImageUrl" className="mb-1 block">Image URL (Optional)</Label>
+        <Input
+          id="postImageUrl"
+          {...register('postImageUrl')}
+          type="url"
+          placeholder="https://example.com/image.png"
+          aria-invalid={errors.postImageUrl ? "true" : "false"}
+          aria-describedby="imageUrl-error"
+        />
+        {errors.postImageUrl && <p id="imageUrl-error" className="text-sm text-destructive mt-1">{errors.postImageUrl.message}</p>}
+      </div>
+      <Button type="submit" disabled={isSubmitting} className="w-full">
+        {isSubmitting ? (
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        ) : (
+          <Send className="mr-2 h-4 w-4" />
+        )}
+        {isSubmitting ? 'Posting...' : 'Create Post'}
+      </Button>
+    </form>
   );
+
+  if (!onOpenChange) {
+    return (
+      <Card className="mb-6 shadow-md rounded-lg">
+        <CardHeader>
+          <CardTitle className="text-lg">Create a New Post</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {FormContent}
+        </CardContent>
+      </Card>
+    );
+  }
+  
+  return FormContent;
 }

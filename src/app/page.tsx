@@ -10,7 +10,7 @@ import { ThumbsUp, MessageCircle, Share2, Flag, Award } from 'lucide-react';
 import { mockFeedPosts as initialMockFeedPosts } from '@/lib/mockData';
 import type { FeedPost } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
-import { CreatePostForm } from '@/components/forms/CreatePostForm';
+// CreatePostForm import removed
 import {
   Tooltip,
   TooltipContent,
@@ -112,13 +112,21 @@ function FeedPostCard({ post }: { post: FeedPost }) {
 export default function HomePage() {
   const [feedPosts, setFeedPosts] = useState<FeedPost[]>(initialMockFeedPosts);
 
+  // This function will be passed to CreateMenu, then to CreatePostForm
   const handleCreatePost = (newPost: FeedPost) => {
     setFeedPosts(prevPosts => [newPost, ...prevPosts]);
   };
 
+  // The CreatePostForm is no longer rendered directly here.
+  // It will be part of the CreateMenu component triggered from the sidebar.
+  // We need to pass `handleCreatePost` to the `AppLayout` or a shared context later if CreateMenu is high up,
+  // or make `CreateMenu` a child here if it's simpler. For now, it's in LeftSidebarNav.
+  // The actual `handleCreatePost` logic might need to be lifted or passed differently.
+  // For this iteration, `CreatePostForm`'s `onSubmitSuccess` will call this if passed down.
+
   return (
     <div className="max-w-2xl mx-auto">
-      <CreatePostForm onSubmitSuccess={handleCreatePost} />
+      {/* CreatePostForm removed from here */}
       <h1 className="text-2xl font-bold mb-6 mt-8">Live Feed</h1>
       {feedPosts.length === 0 && <p className="text-muted-foreground text-center py-4">No posts yet. Be the first to share something!</p>}
       {feedPosts.map((post) => (
