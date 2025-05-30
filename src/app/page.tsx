@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import Link from 'next/link'; // Import Link
+import Link from 'next/link'; 
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -29,9 +29,10 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { CreatePostForm } from '@/components/forms/CreatePostForm';
-import { CreateCampaignForm } from '@/components/forms/CreateCampaignForm';
+// CreateCampaignForm import is no longer needed here
+// import { CreateCampaignForm } from '@/components/forms/CreateCampaignForm'; 
 import { CreatePollForm } from '@/components/forms/CreatePollForm';
-import { CreateVideoForm } from '@/components/forms/CreateVideoForm'; // New form
+import { CreateVideoForm } from '@/components/forms/CreateVideoForm'; 
 import { Separator } from '@/components/ui/separator';
 
 
@@ -210,7 +211,7 @@ const initialFeedItems: FeedItem[] = initialMockFeedPosts.map((post: OldFeedPost
 export default function HomePage() {
   const [feedItems, setFeedItems] = useState<FeedItem[]>(initialFeedItems);
   const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
-  const [isCampaignDialogOpen, setIsCampaignDialogOpen] = useState(false);
+  // const [isCampaignDialogOpen, setIsCampaignDialogOpen] = useState(false); // Removed
   const [isPollDialogOpen, setIsPollDialogOpen] = useState(false);
   const [isVideoDialogOpen, setIsVideoDialogOpen] = useState(false);
 
@@ -225,39 +226,36 @@ export default function HomePage() {
     setIsPostDialogOpen(false);
   };
 
-  const handleCreateCampaign = (newCampaignData: Campaign) => {
-    const campaignFeedItem: CampaignFeedItem = {
-      id: `feed-camp-${newCampaignData.id}`,
-      timestamp: new Date().toISOString(),
-      itemType: 'campaign_created',
-      creatorName: 'Current User', // Placeholder
-      creatorImageUrl: 'https://placehold.co/40x40.png?text=CU',
-      creatorDataAiHint: 'person face',
-      campaignId: newCampaignData.id, // Store the actual campaign ID
-      campaignName: newCampaignData.name,
-      campaignLocation: newCampaignData.location,
-      campaignDescription: newCampaignData.description,
-    };
-    addNewFeedItem(campaignFeedItem);
-    // Note: This doesn't add to the actual /campaigns page list, only to this feed.
-    // The CreateCampaignForm on /campaigns page handles its own list update.
-    setIsCampaignDialogOpen(false);
-  };
+  // const handleCreateCampaign = (newCampaignData: Campaign) => { // Removed
+  //   const campaignFeedItem: CampaignFeedItem = {
+  //     id: `feed-camp-${newCampaignData.id}`,
+  //     timestamp: new Date().toISOString(),
+  //     itemType: 'campaign_created',
+  //     creatorName: 'Current User', 
+  //     creatorImageUrl: 'https://placehold.co/40x40.png?text=CU',
+  //     creatorDataAiHint: 'person face',
+  //     campaignId: newCampaignData.id, 
+  //     campaignName: newCampaignData.name,
+  //     campaignLocation: newCampaignData.location,
+  //     campaignDescription: newCampaignData.description,
+  //   };
+  //   addNewFeedItem(campaignFeedItem);
+  //   setIsCampaignDialogOpen(false);
+  // };
 
   const handleCreatePoll = (newPollData: Poll) => {
      const pollFeedItem: PollFeedItem = {
       id: `feed-poll-${newPollData.id}`,
       timestamp: new Date().toISOString(),
       itemType: 'poll_created',
-      creatorName: 'Current User', // Placeholder
+      creatorName: 'Current User', 
       creatorImageUrl: 'https://placehold.co/40x40.png?text=CU',
       creatorDataAiHint: 'person face',
-      pollId: newPollData.id, // Store the actual poll ID
+      pollId: newPollData.id, 
       pollQuestion: newPollData.question,
       pollOptions: newPollData.options.map(opt => ({ text: opt.text })),
     };
     addNewFeedItem(pollFeedItem);
-    // Note: This doesn't add to a global poll list, only to this feed.
     setIsPollDialogOpen(false);
   };
   
@@ -295,6 +293,8 @@ export default function HomePage() {
             </Tooltip>
           </TooltipProvider>
 
+          {/* Campaign Creation Button Removed */}
+          {/* 
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -305,7 +305,8 @@ export default function HomePage() {
               </TooltipTrigger>
               <TooltipContent><p>Start a Campaign</p></TooltipContent>
             </Tooltip>
-          </TooltipProvider>
+          </TooltipProvider> 
+          */}
 
           <TooltipProvider>
             <Tooltip>
@@ -329,18 +330,21 @@ export default function HomePage() {
       </Dialog>
 
       <Dialog open={isVideoDialogOpen} onOpenChange={setIsVideoDialogOpen}>
-        <DialogContent className="sm:max-w-[520px] overflow-y-auto max-h-[90vh]"> {/* Slightly wider for video preview */}
+        <DialogContent className="sm:max-w-[520px] overflow-y-auto max-h-[90vh]"> 
           <DialogHeader><DialogTitle>Upload a Video</DialogTitle></DialogHeader>
           <CreateVideoForm onSubmitSuccess={handleCreateVideo} onOpenChange={setIsVideoDialogOpen} />
         </DialogContent>
       </Dialog>
       
+      {/* Campaign Creation Dialog Removed */}
+      {/* 
       <Dialog open={isCampaignDialogOpen} onOpenChange={setIsCampaignDialogOpen}>
         <DialogContent className="sm:max-w-[480px] overflow-y-auto max-h-[90vh]">
           <DialogHeader><DialogTitle>Create a New Campaign</DialogTitle></DialogHeader>
           <CreateCampaignForm onSubmitSuccess={handleCreateCampaign} onOpenChange={setIsCampaignDialogOpen} />
         </DialogContent>
-      </Dialog>
+      </Dialog> 
+      */}
 
       <Dialog open={isPollDialogOpen} onOpenChange={setIsPollDialogOpen}>
         <DialogContent className="sm:max-w-[480px] overflow-y-auto max-h-[90vh]">
@@ -351,6 +355,7 @@ export default function HomePage() {
 
 
       <h1 className="text-2xl font-bold mb-6 mt-8">Live Feed</h1>
+      <p className="text-muted-foreground mb-4">This is a placeholder for the live feed. Content creation UI has been moved above.</p>
       {feedItems.length === 0 && <p className="text-muted-foreground text-center py-4">No items in the feed yet. Be the first to share something!</p>}
       {feedItems.map((item) => (
         <FeedItemCard key={item.id} item={item} />
