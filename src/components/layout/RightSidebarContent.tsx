@@ -7,8 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
-import { Search, HandHeart, Vote as VoteIcon, Loader2 } from 'lucide-react'; // Added VoteIcon, Loader2
-import { mockCandidates } from '@/lib/mockData'; // To get candidate names
+import { Search, HandHeart, Vote as VoteIcon, Loader2 } from 'lucide-react'; 
+import { mockCandidates } from '@/lib/mockData'; 
 import type { Candidate } from '@/types';
 
 interface SidebarPollOption {
@@ -97,7 +97,7 @@ export function RightSidebarContent() {
                         <div className="space-y-1">
                           <div className="flex justify-between text-xs">
                             <span className="font-medium">{option.text}</span>
-                            <span>{option.votes} vote(s) ({percentage.toFixed(0)}%)</span>
+                            <span>{percentage.toFixed(0)}%</span>
                           </div>
                           <Progress value={percentage} className="h-2" />
                         </div>
@@ -115,11 +115,7 @@ export function RightSidebarContent() {
                   );
                 })}
               </div>
-              {electionPoll.userHasVoted && (
-                <p className="text-xs text-muted-foreground text-right mt-3">
-                  Total Votes: {electionPoll.totalVotes}
-                </p>
-              )}
+              {/* Total votes display removed as per request */}
             </>
           )}
            {!electionPoll && !isLoadingPoll && (
