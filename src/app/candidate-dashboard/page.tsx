@@ -15,18 +15,12 @@ import { mockMonitoredVolunteers } from '@/lib/mockData';
 import type { MonitoredVolunteer, GroupChat } from '@/types';
 import { LayoutDashboard, Users, Filter, Search as SearchIcon, MessageSquarePlus, Eye } from 'lucide-react'; // Added Eye
 import { CreateGroupChatForm, type CreateGroupChatFormData } from '@/components/forms/CreateGroupChatForm';
+import { INTEREST_AREAS } from '@/lib/constants'; // Import INTEREST_AREAS
 
-const interestLabels: { [key: string]: string } = {
-  canvassing: 'Canvassing',
-  phone_banking: 'Phone Banking',
-  event_support: 'Event Support',
-  data_entry: 'Data Entry',
-  social_media: 'Social Media',
-  other: 'Other',
-};
-
+// Use INTEREST_AREAS for labels
 function getInterestLabel(interestKey: string): string {
-  return interestLabels[interestKey] || interestKey.charAt(0).toUpperCase() + interestKey.slice(1).replace(/_/g, ' ');
+  const foundArea = INTEREST_AREAS.find(area => area.id === interestKey);
+  return foundArea ? foundArea.label : interestKey.charAt(0).toUpperCase() + interestKey.slice(1).replace(/_/g, ' ');
 }
 
 function getStatusColor(status: MonitoredVolunteer['status']): string {
@@ -50,11 +44,10 @@ export default function CandidateDashboardPage() {
   const [isCreateGroupChatOpen, setIsCreateGroupChatOpen] = useState(false);
   const [createdGroupChats, setCreatedGroupChats] = useState<GroupChat[]>([]); 
 
+  // Use INTEREST_AREAS for the filter dropdown options
   const uniqueInterests = useMemo(() => {
-    const allInterests = new Set<string>();
-    volunteers.forEach(v => v.interests.forEach(i => allInterests.add(i)));
-    return ['all', ...Array.from(allInterests)];
-  }, [volunteers]);
+    return ['all', ...INTEREST_AREAS.map(area => area.id)];
+  }, []);
 
   const filteredVolunteers = useMemo(() => {
     return volunteers.filter(volunteer => {
@@ -150,9 +143,9 @@ export default function CandidateDashboardPage() {
                   <SelectValue placeholder="Filter by Interest" />
                 </SelectTrigger>
                 <SelectContent>
-                  {uniqueInterests.map(interest => (
-                    <SelectItem key={interest} value={interest}>
-                      {interest === 'all' ? 'All Interests' : getInterestLabel(interest)}
+                  {uniqueInterests.map(interestKey => (
+                    <SelectItem key={interestKey} value={interestKey}>
+                      {interestKey === 'all' ? 'All Interests' : getInterestLabel(interestKey)}
                     </SelectItem>
                   ))}
                 </SelectContent>

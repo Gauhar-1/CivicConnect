@@ -21,3 +21,12 @@ export const NAV_LINKS: NavLink[] = [
 
 export const APP_NAME = 'CivicConnect';
 export const APP_ICON = Vote;
+
+export const INTEREST_AREAS = [
+  { id: 'canvassing', label: 'Canvassing (Door-to-door)' },
+  { id: 'phone_banking', label: 'Phone Banking' },
+  { id: 'event_support', label: 'Event Support & Logistics' },
+  { id: 'data_entry', label: 'Data Entry & Admin Tasks' },
+  { id: 'social_media', label: 'Social Media & Digital Outreach' },
+  { id: 'other', label: 'Other (Please specify in message)' },
+];

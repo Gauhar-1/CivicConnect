@@ -24,15 +24,7 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
-
-const interestAreas = [
-  { id: 'canvassing', label: 'Canvassing (Door-to-door)' },
-  { id: 'phone_banking', label: 'Phone Banking' },
-  { id: 'event_support', label: 'Event Support & Logistics' },
-  { id: 'data_entry', label: 'Data Entry & Admin Tasks' },
-  { id: 'social_media', label: 'Social Media & Digital Outreach' },
-  { id: 'other', label: 'Other (Please specify in message)' },
-];
+import { INTEREST_AREAS } from '@/lib/constants'; // Import INTEREST_AREAS
 
 const availabilityOptions = [
   'Weekdays - Morning (9am-12pm)',
@@ -206,7 +198,7 @@ export function VolunteerSignupForm() {
             <div>
               <Label>Areas of Interest (Select all that apply)</Label>
               <div className="space-y-2 mt-1">
-                {interestAreas.map((item) => (
+                {INTEREST_AREAS.map((item) => ( // Use imported INTEREST_AREAS
                   <FormField
                     key={item.id}
                     control={form.control}

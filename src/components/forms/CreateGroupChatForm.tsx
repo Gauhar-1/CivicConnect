@@ -23,6 +23,7 @@ import {
   FormMessage,
   FormDescription,
 } from "@/components/ui/form";
+import { INTEREST_AREAS } from '@/lib/constants'; // Import INTEREST_AREAS
 
 const createGroupChatSchema = z.object({
   groupName: z.string().min(3, 'Group name must be at least 3 characters.').max(100),
@@ -53,11 +54,10 @@ export function CreateGroupChatForm({ volunteers, onSubmitSuccess, onOpenChange 
 
   const selectedInterest = watch('selectedInterest');
 
+  // Use the centralized INTEREST_AREAS for the dropdown
   const availableInterests = React.useMemo(() => {
-    const allInterests = new Set<string>();
-    volunteers.forEach(v => v.interests.forEach(i => allInterests.add(i)));
-    return Array.from(allInterests);
-  }, [volunteers]);
+    return INTEREST_AREAS;
+  }, []);
 
   const filteredVolunteers = React.useMemo(() => {
     if (!selectedInterest) return [];
@@ -109,9 +109,9 @@ export function CreateGroupChatForm({ volunteers, onSubmitSuccess, onOpenChange 
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {availableInterests.map(interest => (
-                    <SelectItem key={interest} value={interest}>
-                      {interest.charAt(0).toUpperCase() + interest.slice(1).replace(/_/g, ' ')}
+                  {availableInterests.map(interestArea => ( // Use interestArea from constant
+                    <SelectItem key={interestArea.id} value={interestArea.id}>
+                      {interestArea.label} 
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -133,7 +133,7 @@ export function CreateGroupChatForm({ volunteers, onSubmitSuccess, onOpenChange 
                 <div className="mb-2">
                   <FormLabel>Select Volunteers for "{form.getValues('groupName') || 'New Group'}"</FormLabel>
                   <FormDescription>
-                    Found {filteredVolunteers.length} active volunteer(s) for '{selectedInterest.replace(/_/g, ' ')}'.
+                    Found {filteredVolunteers.length} active volunteer(s) for '{INTEREST_AREAS.find(area => area.id === selectedInterest)?.label || selectedInterest}'.
                   </FormDescription>
                 </div>
                 {filteredVolunteers.length > 0 ? (
