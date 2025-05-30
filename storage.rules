@@ -1,0 +1,47 @@
+
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Profile Pictures: Users can read anyone's profile picture, but only write their own.
+    // Path: /users/{userId}/profilePicture.jpg
+    match /users/{userId}/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == userId && request.resource.size < 5 * 1024 * 1024 // Max 5MB
+                   && request.resource.contentType.matches('image/.*');
+    }
+
+    // Post Media (images/videos for feed posts)
+    // Path: /posts/{userId}/{postId}/{fileName}
+    match /posts/{userId}/{postId}/{fileName} {
+      allow read: if true; // Or restrict to authenticated users: request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId
+                   && request.resource.size < 20 * 1024 * 1024 // Max 20MB
+                   && (request.resource.contentType.matches('image/.*') || request.resource.contentType.matches('video/.*'));
+    }
+
+    // Campaign Media (images/videos for campaign discovery)
+    // Path: /campaigns/{campaignId}/{fileName}
+    // Write access might be restricted to CANDIDATE or ADMIN roles via custom claims or Firestore lookup (more complex)
+    match /campaigns/{campaignId}/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null // For simplicity, allow any authenticated user. Restrict by role for production.
+                   && request.resource.size < 20 * 1024 * 1024
+                   && (request.resource.contentType.matches('image/.*') || request.resource.contentType.matches('video/.*'));
+    }
+
+    // Report Attachments
+    // Path: /reports/{userId}/{reportId}/{fileName}
+    match /reports/{userId}/{reportId}/{fileName} {
+        allow read: if request.auth != null; // Admins or specific users might need read access based on Firestore data
+        allow write: if request.auth != null && request.auth.uid == userId 
+                     && request.resource.size < 10 * 1024 * 1024 // Max 10MB
+                     && (request.resource.contentType.matches('image/.*') || request.resource.contentType.matches('video/.*') || request.resource.contentType.matches('application/pdf'));
+    }
+
+    // Default deny all other access
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

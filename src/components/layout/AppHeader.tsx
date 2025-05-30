@@ -2,9 +2,9 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { LogIn, LogOut, Menu, User, Vote } from 'lucide-react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,18 +16,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { HideIfAuth, ShowIfAuth } from '../auth/RequiredAuth';
+import { HideIfAuth } from '../auth/RequiredAuth'; // Keep HideIfAuth
 
 export function AppHeader() {
-  const { user, logout, isLoading } = useAuth();
+  const { user, logout, isLoading } = useAuth(); // user is now AppUser or null
 
-  const getUserInitials = (email?: string) => {
-    if (!email) return 'CC';
-    const parts = email.split('@')[0].split(/[._-]/);
-    if (parts.length > 1) {
-      return (parts[0][0] + parts[1][0]).toUpperCase();
+  const getUserInitials = (name?: string, email?: string | null) => {
+    if (name) {
+      const parts = name.split(' ');
+      if (parts.length > 1) {
+        return (parts[0][0] + parts[parts.length -1][0]).toUpperCase();
+      }
+      return name.substring(0, 2).toUpperCase();
     }
-    return email.substring(0, 2).toUpperCase();
+    if (email) {
+      return email.substring(0, 2).toUpperCase();
+    }
+    return 'CC';
   };
 
   return (
@@ -50,8 +55,12 @@ export function AppHeader() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                 <Avatar>
-                  <AvatarImage src={`https://placehold.co/40x40.png?text=${getUserInitials(user.email)}`} alt={user.name || user.email} data-ai-hint="user avatar" />
-                  <AvatarFallback>{getUserInitials(user.email)}</AvatarFallback>
+                  {user.photoURL ? (
+                    <AvatarImage src={user.photoURL} alt={user.name || 'User Avatar'} data-ai-hint="user avatar" />
+                  ) : (
+                     <AvatarImage src={`https://placehold.co/40x40.png?text=${getUserInitials(user.name, user.email)}`} alt={user.name || user.email || 'User'} data-ai-hint="user avatar placeholder" />
+                  )}
+                  <AvatarFallback>{getUserInitials(user.name, user.email)}</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
@@ -60,12 +69,13 @@ export function AppHeader() {
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium leading-none">{user.name || 'User'}</p>
                   <p className="text-xs leading-none text-muted-foreground">
-                    {user.email}
+                    {user.email || user.phone || 'No contact info'}
                   </p>
+                  <p className="text-xs leading-none text-muted-foreground capitalize">Role: {user.role.toLowerCase()}</p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => {/* TODO: Profile Page Link */}}>
+              <DropdownMenuItem onClick={() => {/* TODO: Profile Page Link to /profile or /users/[uid] */}}>
                 <User className="mr-2 h-4 w-4" />
                 <span>Profile</span>
               </DropdownMenuItem>

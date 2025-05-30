@@ -1,50 +1,73 @@
 
 'use server';
 
-import type { User } from '@/types';
 import { z } from 'zod';
+import { firestoreDB } from '@/lib/firebase/config';
+import { doc, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
+import type { Role, FirestoreUser, FirestoreRole } from '@/types';
 
-// IMPORTANT: In a real application, NEVER store passwords in plaintext.
-// Always hash passwords securely (e.g., using bcrypt or Argon2).
-const mockUsers = [
-  { id: 'user-admin', email: 'admin@example.com', password: 'password', role: 'ADMIN' as const, name: 'Admin User' },
-  { id: 'user-candidate', email: 'candidate@example.com', password: 'password', role: 'CANDIDATE' as const, name: 'Candidate Test' },
-  { id: 'user-volunteer', email: 'volunteer@example.com', password: 'password', role: 'VOLUNTEER' as const, name: 'Volunteer Test' },
-  { id: 'user-voter', email: 'voter@example.com', password: 'password', role: 'VOTER' as const, name: 'Voter Test' },
-];
-
-const loginSchema = z.object({
-  email: z.string().email({ message: 'Invalid email address.' }),
-  password: z.string().min(1, { message: 'Password is required.' }),
+const createUserProfileSchema = z.object({
+  uid: z.string().min(1),
+  phone: z.string().nullable(),
+  email: z.string().email().nullable().optional(),
+  name: z.string().min(2, 'Name must be at least 2 characters.').optional(),
+  role: z.enum(['VOTER', 'VOLUNTEER', 'CANDIDATE', 'ADMIN']),
+  photoURL: z.string().url().nullable().optional(),
+  regionId: z.string().optional(),
 });
 
-export type LoginCredentials = z.infer<typeof loginSchema>;
+export type CreateUserProfileInput = z.infer<typeof createUserProfileSchema>;
 
 interface ActionResult {
   success: boolean;
-  user?: User | null;
   error?: string | null;
+  userId?: string;
 }
 
-export async function loginAction(credentials: LoginCredentials): Promise<ActionResult> {
+export async function createUserProfileAndRoleAction(input: CreateUserProfileInput): Promise<ActionResult> {
   try {
-    const validatedCredentials = loginSchema.parse(credentials);
+    const validatedData = createUserProfileSchema.parse(input);
+    const { uid, role, ...userProfileData } = validatedData;
 
-    const foundUser = mockUsers.find(
-      (u) => u.email === validatedCredentials.email && u.password === validatedCredentials.password
-    );
+    // Create user profile document in /users collection
+    const userDocRef = doc(firestoreDB, 'users', uid);
+    const userDocSnap = await getDoc(userDocRef);
 
-    if (foundUser) {
-      const { password, ...userWithoutPassword } = foundUser; // Exclude password from returned user object
-      return { success: true, user: userWithoutPassword };
+    const userPayload: Partial<FirestoreUser> = {
+      ...userProfileData,
+      uid, // ensure uid is part of the payload
+      createdAt: serverTimestamp() as unknown as string, // Firestore will convert this
+    };
+    
+    if (userDocSnap.exists()) {
+        // Update existing user document if necessary, e.g. name or photoURL
+        await setDoc(userDocRef, {
+            ...userProfileData,
+            updatedAt: serverTimestamp() // Add an updatedAt field if desired
+        }, { merge: true });
     } else {
-      return { success: false, error: 'Invalid email or password.' };
+        await setDoc(userDocRef, userPayload);
     }
+
+
+    // Create/update role document in /roles collection
+    const roleDocRef = doc(firestoreDB, 'roles', uid);
+    const rolePayload: FirestoreRole = {
+      uid,
+      role,
+      updatedAt: serverTimestamp() as unknown as string,
+    };
+    await setDoc(roleDocRef, rolePayload, { merge: true }); // Use merge to update if exists
+
+    return { success: true, userId: uid };
   } catch (error) {
+    console.error('Error creating user profile/role:', error);
     if (error instanceof z.ZodError) {
       return { success: false, error: error.errors.map((e) => e.message).join(', ') };
     }
-    console.error('Login error:', error);
+    if (error instanceof Error) {
+      return { success: false, error: error.message };
+    }
     return { success: false, error: 'An unexpected error occurred.' };
   }
 }

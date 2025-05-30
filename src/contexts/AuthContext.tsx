@@ -1,75 +1,127 @@
 
 'use client';
 
-import type { User, Role } from '@/types';
+import type { User, Role, FirestoreUser, FirestoreRole } from '@/types';
 import { createContext, useContext, useState, type ReactNode, useEffect, useCallback } from 'react';
-import { loginAction, type LoginCredentials } from '@/app/(auth)/login/actions'; // Updated import path
 import { useRouter } from 'next/navigation';
+import { firebaseAuth, firestoreDB } from '@/lib/firebase/config';
+import { onAuthStateChanged, type User as FirebaseUser, signOut } from 'firebase/auth';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 interface AuthContextType {
-  user: User | null;
+  user: User | null; // This will be our app's User type, enriched with role
+  firebaseUser: FirebaseUser | null; // Raw Firebase Auth user
   role: Role;
   isLoading: boolean;
-  login: (credentials: LoginCredentials) => Promise<{ success: boolean; error?: string; user?: User | null }>;
   logout: () => void;
+  // Login is now handled by the login page UI directly with Firebase SDK
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
+  const [appUser, setAppUser] = useState<User | null>(null);
+  const [role, setRole] = useState<Role>('ANONYMOUS');
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  const checkAuthStatus = useCallback(async () => {
-    setIsLoading(true);
+  const fetchUserRoleAndProfile = useCallback(async (fbUser: FirebaseUser) => {
+    if (!fbUser) {
+      setAppUser(null);
+      setRole('ANONYMOUS');
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const storedUser = localStorage.getItem('authUser');
-      if (storedUser) {
-        const parsedUser: User = JSON.parse(storedUser);
-        // For this prototype, if a user is in localStorage, assume it's valid.
-        // The loginAction is the source of truth for actual validation against mockUsers.
-        setUser(parsedUser);
-      } else {
-        setUser(null);
+      const roleDocRef = doc(firestoreDB, 'roles', fbUser.uid);
+      const roleDocSnap = await getDoc(roleDocRef);
+      let currentRole: Role = 'VOTER'; // Default role if not found
+
+      if (roleDocSnap.exists()) {
+        currentRole = roleDocSnap.data()?.role as Role || 'VOTER';
       }
+      setRole(currentRole);
+
+      const userDocRef = doc(firestoreDB, 'users', fbUser.uid);
+      const userDocSnap = await getDoc(userDocRef);
+      
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data() as FirestoreUser;
+        setAppUser({
+          uid: fbUser.uid,
+          phone: fbUser.phoneNumber,
+          email: fbUser.email,
+          name: userData.name,
+          role: currentRole,
+          photoURL: userData.photoURL || fbUser.photoURL,
+          regionId: userData.regionId,
+        });
+      } else {
+        // User exists in Auth, but not in Firestore users collection yet.
+        // This might happen if profile creation is pending or failed.
+        // For now, set basic app user from FirebaseUser and role.
+        setAppUser({
+          uid: fbUser.uid,
+          phone: fbUser.phoneNumber,
+          email: fbUser.email,
+          role: currentRole,
+          name: fbUser.displayName || undefined,
+          photoURL: fbUser.photoURL,
+        });
+        // Consider redirecting to a profile completion page if necessary
+      }
+
     } catch (error) {
-      console.error("Failed to check auth status", error);
-      setUser(null);
-      localStorage.removeItem('authUser');
+      console.error("Error fetching user role/profile:", error);
+      // Fallback if Firestore fetch fails
+      setAppUser({
+        uid: fbUser.uid,
+        phone: fbUser.phoneNumber,
+        email: fbUser.email,
+        role: 'VOTER', // Default to VOTER on error
+        name: fbUser.displayName || undefined,
+        photoURL: fbUser.photoURL,
+      });
+      setRole('VOTER');
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    checkAuthStatus();
-  }, [checkAuthStatus]);
-
-  const login = async (credentials: LoginCredentials) => {
     setIsLoading(true);
-    const result = await loginAction(credentials);
-    if (result.success && result.user) {
-      setUser(result.user);
-      localStorage.setItem('authUser', JSON.stringify(result.user));
-    } else {
-      setUser(null);
-      localStorage.removeItem('authUser');
+    const unsubscribe = onAuthStateChanged(firebaseAuth, async (fbUser) => {
+      setFirebaseUser(fbUser);
+      if (fbUser) {
+        await fetchUserRoleAndProfile(fbUser);
+      } else {
+        setAppUser(null);
+        setRole('ANONYMOUS');
+        setIsLoading(false);
+      }
+    });
+    return () => unsubscribe();
+  }, [fetchUserRoleAndProfile]);
+
+  const logout = async () => {
+    setIsLoading(true);
+    try {
+      await signOut(firebaseAuth);
+      setFirebaseUser(null);
+      setAppUser(null);
+      setRole('ANONYMOUS');
+      router.push('/login'); 
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
-    return result;
   };
-
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('authUser');
-    router.push('/login'); // Path remains /login due to route group
-  };
-
-  const role = user?.role || 'ANONYMOUS';
-
+  
   return (
-    <AuthContext.Provider value={{ user, role, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user: appUser, firebaseUser, role, isLoading, logout }}>
       {children}
     </AuthContext.Provider>
   );

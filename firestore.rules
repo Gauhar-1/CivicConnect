@@ -1,0 +1,80 @@
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Users:
+    // - Authenticated users can create their own user document.
+    // - Users can read and update their own document.
+    // - Admins (via a Cloud Function or specific claim) could read/write any.
+    match /users/{userId} {
+      allow read, update, delete: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      // allow list: if request.auth != null && get(/databases/$(database)/documents/roles/$(request.auth.uid)).data.role == 'ADMIN'; // Example for admin list
+    }
+
+    // Roles:
+    // - Users can read their own role.
+    // - Role creation/update should ideally be handled by a trusted backend/Cloud Function.
+    //   For now, allow authenticated users to create/update their own role document.
+    //   WARNING: Client-side role assignment is insecure, especially for admin roles.
+    match /roles/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow create, update: if request.auth != null && request.auth.uid == userId; // Should be more restrictive
+      // allow list: if request.auth != null && get(/databases/$(database)/documents/roles/$(request.auth.uid)).data.role == 'ADMIN'; // Example for admin list
+    }
+
+    // Posts:
+    // - Authenticated users can create posts.
+    // - Anyone can read posts.
+    // - Users can update/delete their own posts.
+    // - Admins can update/delete any post.
+    match /posts/{postId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && (resource.data.userId == request.auth.uid || get(/databases/$(database)/documents/roles/$(request.auth.uid)).data.role == 'ADMIN');
+    }
+
+    // Polls:
+    // - Only 'CANDIDATE' or 'ADMIN' roles can create polls.
+    // - Authenticated users can read polls and vote.
+    // - Creator or Admin can update/delete.
+    match /polls/{pollId} {
+      allow read: if true; // All users can read polls
+      allow create: if request.auth != null && (get(/databases/$(database)/documents/roles/$(request.auth.uid)).data.role == 'CANDIDATE' || get(/databases/$(database)/documents/roles/$(request.auth.uid)).data.role == 'ADMIN');
+      allow update, delete: if request.auth != null && (resource.data.mpId == request.auth.uid || get(/databases/$(database)/documents/roles/$(request.auth.uid)).data.role == 'ADMIN');
+      // Voting logic would be more complex, often handled by a transaction/Cloud Function to update votes[]
+    }
+    
+    // Regions:
+    // - Generally public read.
+    // - Creation/update restricted to Admins.
+    match /regions/{regionId} {
+        allow read: if true;
+        allow write: if request.auth != null && get(/databases/$(database)/documents/roles/$(request.auth.uid)).data.role == 'ADMIN';
+    }
+
+    // Tasks:
+    // - AssignedBy (Candidate/Admin) can create.
+    // - AssignedTo (Volunteer) can read/update status.
+    // - Admins can manage.
+    match /tasks/{taskId} {
+        allow read, update: if request.auth != null && (resource.data.toVolunteerId == request.auth.uid || resource.data.assignedBy == request.auth.uid || get(/databases/$(database)/documents/roles/$(request.auth.uid)).data.role == 'ADMIN');
+        allow create: if request.auth != null && (get(/databases/$(database)/documents/roles/$(request.auth.uid)).data.role == 'CANDIDATE' || get(/databases/$(database)/documents/roles/$(request.auth.uid)).data.role == 'ADMIN');
+        allow delete: if request.auth != null && (resource.data.assignedBy == request.auth.uid || get(/databases/$(database)/documents/roles/$(request.auth.uid)).data.role == 'ADMIN');
+    }
+    
+    // ChatGroups & Messages (Realtime Database rules are separate, this is for potential Firestore metadata)
+    // - Members can read/write messages within their group.
+    match /chatGroups/{groupId} {
+        allow read, write: if request.auth != null && request.auth.uid in resource.data.members;
+        // More granular rules for who can add/remove members might be needed
+    }
+
+    // Default deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
