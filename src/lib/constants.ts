@@ -1,6 +1,6 @@
 
 import type { LucideIcon } from 'lucide-react';
-import { Home, Users, CalendarDays, FileText, Search, Vote, HandHeart, LayoutDashboard } from 'lucide-react';
+import { Home, Users, CalendarDays, FileText, Search, Vote, HandHeart, LayoutDashboard, ShieldCheck } from 'lucide-react';
 
 export interface NavLink {
   href: string;
@@ -16,6 +16,7 @@ export const NAV_LINKS: NavLink[] = [
   { href: '/campaigns', label: 'Campaign Discovery', icon: Search },
   { href: '/volunteer-signup', label: 'Volunteer Signup', icon: HandHeart },
   { href: '/candidate-dashboard', label: 'Candidate Dashboard', icon: LayoutDashboard },
+  { href: '/admin', label: 'Admin Panel', icon: ShieldCheck },
 ];
 
 
