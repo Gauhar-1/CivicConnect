@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Send } from 'lucide-react';
+import { Send, Loader2 } from 'lucide-react'; // Added Loader2 for submitting state
 import type { FeedPost } from '@/types';
 
 const createPostSchema = z.object({
@@ -50,6 +50,10 @@ export function CreatePostForm({ onSubmitSuccess }: CreatePostFormProps) {
       comments: 0,
       shares: 0,
     };
+    
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+
     onSubmitSuccess(newPost);
     reset();
   };
@@ -62,27 +66,35 @@ export function CreatePostForm({ onSubmitSuccess }: CreatePostFormProps) {
       <CardContent>
         <form onSubmit={handleSubmit(processSubmit)} className="space-y-4">
           <div>
-            <Label htmlFor="postContent">What's on your mind?</Label>
+            <Label htmlFor="postContent" className="mb-1 block">What's on your mind?</Label>
             <Textarea
               id="postContent"
               {...register('content')}
               placeholder="Share an update, news, or an announcement..."
               className="min-h-[100px]"
+              aria-invalid={errors.content ? "true" : "false"}
+              aria-describedby="content-error"
             />
-            {errors.content && <p className="text-sm text-destructive mt-1">{errors.content.message}</p>}
+            {errors.content && <p id="content-error" className="text-sm text-destructive mt-1">{errors.content.message}</p>}
           </div>
           <div>
-            <Label htmlFor="postImageUrl">Image URL (Optional)</Label>
+            <Label htmlFor="postImageUrl" className="mb-1 block">Image URL (Optional)</Label>
             <Input
               id="postImageUrl"
               {...register('postImageUrl')}
               type="url"
               placeholder="https://example.com/image.png"
+              aria-invalid={errors.postImageUrl ? "true" : "false"}
+              aria-describedby="imageUrl-error"
             />
-            {errors.postImageUrl && <p className="text-sm text-destructive mt-1">{errors.postImageUrl.message}</p>}
+            {errors.postImageUrl && <p id="imageUrl-error" className="text-sm text-destructive mt-1">{errors.postImageUrl.message}</p>}
           </div>
           <Button type="submit" disabled={isSubmitting} className="w-full">
-            <Send className="mr-2 h-4 w-4" />
+            {isSubmitting ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Send className="mr-2 h-4 w-4" />
+            )}
             {isSubmitting ? 'Posting...' : 'Create Post'}
           </Button>
         </form>
