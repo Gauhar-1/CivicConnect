@@ -176,3 +176,7 @@ export const mockPolls: Poll[] = [];
 // Helper to get a single candidate by ID
 export const getCandidateById = (id: string): Candidate | undefined => 
   mockCandidates.find(candidate => candidate.id === id);
+
+// Helper to get a single campaign by ID
+export const getCampaignById = (id: string): Campaign | undefined =>
+  mockCampaigns.find(campaign => campaign.id === id);

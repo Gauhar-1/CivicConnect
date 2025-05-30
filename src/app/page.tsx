@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link'; // Import Link
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -72,7 +73,11 @@ function FeedItemCard({ item }: { item: FeedItem }) {
             <p className="font-semibold">New Campaign Created: {item.campaignName}</p>
             {item.campaignLocation && <p className="text-xs text-muted-foreground">Location: {item.campaignLocation}</p>}
             {item.campaignDescription && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{item.campaignDescription}</p>}
-             <Button variant="link" size="sm" className="px-0 h-auto mt-1 text-primary">View Campaign</Button>
+             <Link href={`/campaigns/${item.campaignId}`} passHref legacyBehavior>
+                <a>
+                    <Button variant="link" size="sm" className="px-0 h-auto mt-1 text-primary">View Campaign</Button>
+                </a>
+             </Link>
           </div>
         );
       case 'poll_created':
@@ -85,7 +90,8 @@ function FeedItemCard({ item }: { item: FeedItem }) {
                 {item.pollOptions.length > 2 && <li>...and more</li>}
               </ul>
             )}
-            <Button variant="link" size="sm" className="px-0 h-auto mt-1 text-primary">View Poll</Button>
+            {/* Placeholder for linking to a specific poll page if created */}
+            <Button variant="link" size="sm" className="px-0 h-auto mt-1 text-primary disabled:text-muted-foreground" disabled>View Poll</Button>
           </div>
         );
       default:
@@ -227,6 +233,7 @@ export default function HomePage() {
       creatorName: 'Current User', // Placeholder
       creatorImageUrl: 'https://placehold.co/40x40.png?text=CU',
       creatorDataAiHint: 'person face',
+      campaignId: newCampaignData.id, // Store the actual campaign ID
       campaignName: newCampaignData.name,
       campaignLocation: newCampaignData.location,
       campaignDescription: newCampaignData.description,
@@ -245,6 +252,7 @@ export default function HomePage() {
       creatorName: 'Current User', // Placeholder
       creatorImageUrl: 'https://placehold.co/40x40.png?text=CU',
       creatorDataAiHint: 'person face',
+      pollId: newPollData.id, // Store the actual poll ID
       pollQuestion: newPollData.question,
       pollOptions: newPollData.options.map(opt => ({ text: opt.text })),
     };

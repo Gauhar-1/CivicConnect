@@ -40,9 +40,13 @@ function CampaignCard({ campaign }: { campaign: Campaign }) {
         <p className="text-sm text-muted-foreground line-clamp-3">{campaign.description}</p>
       </CardContent>
       <CardFooter className="p-4 border-t">
-        <Button variant="outline" size="sm" className="w-full">
-          Learn More <ChevronRight className="ml-1 h-4 w-4" />
-        </Button>
+        <Link href={`/campaigns/${campaign.id}`} passHref legacyBehavior>
+          <a>
+            <Button variant="outline" size="sm" className="w-full">
+              Learn More <ChevronRight className="ml-1 h-4 w-4" />
+            </Button>
+          </a>
+        </Link>
       </CardFooter>
     </Card>
   );
@@ -96,7 +100,7 @@ export default function CampaignDiscoveryPage() {
               <PlusCircle className="mr-2 h-4 w-4" /> Create New Campaign
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[480px]">
+          <DialogContent className="sm:max-w-[480px] overflow-y-auto max-h-[90vh]">
             <DialogHeader>
               <DialogTitle>Create a New Campaign</DialogTitle>
               <DialogDescription>

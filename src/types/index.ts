@@ -53,6 +53,7 @@ export interface VideoPostFeedItem extends BaseFeedItem {
 
 export interface CampaignFeedItem extends BaseFeedItem {
   itemType: 'campaign_created';
+  campaignId: string; // Added to link to the specific campaign
   campaignName: string;
   campaignLocation?: string;
   campaignDescription?: string;
@@ -60,6 +61,7 @@ export interface CampaignFeedItem extends BaseFeedItem {
 
 export interface PollFeedItem extends BaseFeedItem {
   itemType: 'poll_created';
+  pollId: string; // Added to link to a specific poll if a poll page exists
   pollQuestion: string;
   pollOptions?: { text: string }[];
 }
