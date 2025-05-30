@@ -1,8 +1,6 @@
 
 import type { LucideIcon } from 'lucide-react';
-import { Home, Users, CalendarDays, FileText, Search, Vote, HandHeart } from 'lucide-react';
-// AlertTriangle (for Report an Issue) removed
-// ListPlus (for Create Poll) removed as it's no longer a direct nav link
+import { Home, Users, CalendarDays, FileText, Search, Vote, HandHeart, LayoutDashboard } from 'lucide-react';
 
 export interface NavLink {
   href: string;
@@ -15,13 +13,11 @@ export const NAV_LINKS: NavLink[] = [
   { href: '/candidates', label: 'Candidate Directory', icon: Users },
   { href: '/timeline', label: 'Election Timeline', icon: CalendarDays },
   { href: '/manifesto-summarizer', label: 'Manifesto Summaries', icon: FileText },
-  // { href: '/report', label: 'Report an Issue', icon: AlertTriangle }, // Removed this link
   { href: '/campaigns', label: 'Campaign Discovery', icon: Search },
   { href: '/volunteer-signup', label: 'Volunteer Signup', icon: HandHeart },
-  // { href: '/polls/create', label: 'Create Poll', icon: ListPlus }, // Removed this link
+  { href: '/candidate-dashboard', label: 'Candidate Dashboard', icon: LayoutDashboard },
 ];
 
 
 export const APP_NAME = 'CivicConnect';
 export const APP_ICON = Vote;
-

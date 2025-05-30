@@ -113,17 +113,6 @@ export interface Campaign {
   category: 'Local' | 'State' | 'National';
 }
 
-// Report type removed as the feature is deleted
-// export interface Report {
-//   id: string;
-//   title: string;
-//   description: string;
-//   category: string;
-//   status: 'Submitted' | 'In Review' | 'Resolved' | 'Rejected';
-//   dateSubmitted: string;
-//   isAnonymous: boolean;
-//   attachments?: { name: string; url: string }[];
-// }
 
 export interface VolunteerSignup {
   id: string;
@@ -137,6 +126,13 @@ export interface VolunteerSignup {
   message?: string;
   submittedAt: string;
 }
+
+export interface MonitoredVolunteer extends VolunteerSignup {
+  status: 'Active' | 'Pending Review' | 'Inactive';
+  // We could add assignedCandidateId here if we were to filter volunteers per candidate.
+  // For now, the dashboard will show all monitored volunteers.
+}
+
 
 // This Poll type is what CreatePollForm works with.
 // PollOption here matches the one used in PollFeedItem.
@@ -165,4 +161,3 @@ export interface FirestoreRole {
   role: Role;
   updatedAt: string;
 }
-

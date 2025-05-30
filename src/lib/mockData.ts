@@ -1,6 +1,5 @@
 
-import type { Candidate, FeedPost, ElectionEvent, Campaign, Poll } from '@/types';
-// Report type removed
+import type { Candidate, FeedPost, ElectionEvent, Campaign, Poll, VolunteerSignup, MonitoredVolunteer } from '@/types';
 
 export const mockCandidates: Candidate[] = [
   {
@@ -151,29 +150,71 @@ export const mockCampaigns: Campaign[] = [
   },
 ];
 
-// mockReports removed as the feature is deleted
-// export const mockReports: Report[] = [
-//     {
-//         id: 'rep1',
-//         title: 'Misleading Campaign Ad',
-//         description: 'A TV advertisement for candidate X contains false claims about candidate Y\'s voting record.',
-//         category: 'False Information',
-//         status: 'In Review',
-//         dateSubmitted: new Date(Date.now() - 86400000 * 2).toISOString(), // 2 days ago
-//         isAnonymous: false,
-//     },
-//     {
-//         id: 'rep2',
-//         title: 'Voter Intimidation at Poll Site',
-//         description: 'Observed individuals harassing voters at the Elm Street polling location.',
-//         category: 'Election Process',
-//         status: 'Submitted',
-//         dateSubmitted: new Date(Date.now() - 86400000 * 1).toISOString(), // 1 day ago
-//         isAnonymous: true,
-//     }
-// ];
 
 export const mockPolls: Poll[] = [];
+
+export const mockMonitoredVolunteers: MonitoredVolunteer[] = [
+  {
+    id: 'vol1',
+    fullName: 'John Volunteer',
+    email: 'john.vol@example.com',
+    phone: '555-111-2222',
+    volunteerTarget: 'candidate',
+    specificCandidateName: 'Alice Wonderland',
+    interests: ['canvassing', 'event_support'],
+    availability: 'Weekends (Flexible hours)',
+    message: 'Eager to help Alice win!',
+    submittedAt: new Date(Date.now() - 86400000 * 3).toISOString(), // 3 days ago
+    status: 'Active',
+  },
+  {
+    id: 'vol2',
+    fullName: 'Jane Helper',
+    email: 'jane.help@example.com',
+    phone: '555-333-4444',
+    volunteerTarget: 'general',
+    interests: ['phone_banking', 'data_entry', 'social_media'],
+    availability: 'Weekdays - Afternoon (1pm-5pm)',
+    submittedAt: new Date(Date.now() - 86400000 * 1).toISOString(), // 1 day ago
+    status: 'Pending Review',
+  },
+  {
+    id: 'vol3',
+    fullName: 'Sam Supporter',
+    email: 'sam.sup@example.com',
+    volunteerTarget: 'candidate',
+    specificCandidateName: 'Bob The Builder',
+    interests: ['event_support'],
+    availability: 'Fully Flexible',
+    message: 'Ready to support Bob in any way possible.',
+    submittedAt: new Date(Date.now() - 86400000 * 5).toISOString(), // 5 days ago
+    status: 'Active',
+  },
+  {
+    id: 'vol4',
+    fullName: 'Casey Canvasser',
+    email: 'casey.canvass@example.com',
+    phone: '555-888-9999',
+    volunteerTarget: 'candidate',
+    specificCandidateName: 'Alice Wonderland',
+    interests: ['canvassing', 'social_media'],
+    availability: 'Weekdays - Evening (6pm-9pm)',
+    submittedAt: new Date(Date.now() - 86400000 * 2).toISOString(), // 2 days ago
+    status: 'Pending Review',
+  },
+  {
+    id: 'vol5',
+    fullName: 'Alex Admin',
+    email: 'alex.admin@example.com',
+    volunteerTarget: 'general',
+    interests: ['data_entry'],
+    availability: 'Weekdays - Morning (9am-12pm)',
+    message: 'Good with spreadsheets and organizing data.',
+    submittedAt: new Date(Date.now() - 86400000 * 10).toISOString(), // 10 days ago
+    status: 'Inactive',
+  }
+];
+
 
 // Helper to get a single candidate by ID
 export const getCandidateById = (id: string): Candidate | undefined => 
@@ -182,4 +223,3 @@ export const getCandidateById = (id: string): Candidate | undefined =>
 // Helper to get a single campaign by ID
 export const getCampaignById = (id: string): Campaign | undefined =>
   mockCampaigns.find(campaign => campaign.id === id);
-
