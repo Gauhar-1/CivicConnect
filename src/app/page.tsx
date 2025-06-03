@@ -8,8 +8,8 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
-  Heart, MessageCircle, Share2, // Changed ThumbsUp to Heart
-  Edit3, BarChart2, Video as VideoIcon
+  Heart, MessageCircle, Share2,
+  Edit3, BarChart2, Video as VideoIcon, Search as SearchIcon
 } from 'lucide-react';
 import { initialFeedItems as mockInitialFeedItems } from '@/lib/mockData';
 import type { FeedItem, TextPostFeedItem, ImagePostFeedItem, VideoPostFeedItem, CampaignFeedItem, PollFeedItem, PollOption as FeedPollOption, Campaign, Poll } from '@/types';
@@ -36,7 +36,7 @@ import { useToast } from '@/hooks/use-toast';
 interface FeedItemCardProps {
   item: FeedItem;
   onPollVote?: (pollId: string, optionId: string) => void;
-  onLike: (itemId: string, action: 'like' | 'unlike') => void; // Modified onLike signature
+  onLike: (itemId: string, action: 'like' | 'unlike') => void;
   onComment: (itemId: string) => void;
   onShare: (itemId: string) => void;
 }
@@ -139,7 +139,9 @@ function FeedItemCard({ item, onPollVote, onLike, onComment, onShare }: FeedItem
     <Card className="mb-6 shadow-lg rounded-lg overflow-hidden">
       <CardHeader className="flex flex-row items-center space-x-3 p-4">
         <Avatar>
-          <AvatarImage src={item.creatorImageUrl} alt={item.creatorName} data-ai-hint={item.creatorDataAiHint || "person face"} />
+          {item.creatorImageUrl ? (
+            <AvatarImage src={item.creatorImageUrl} alt={item.creatorName} data-ai-hint={item.creatorDataAiHint || "person face"} />
+          ) : null}
           <AvatarFallback>{item.creatorName.substring(0, 2).toUpperCase()}</AvatarFallback>
         </Avatar>
         <div>
@@ -160,14 +162,14 @@ function FeedItemCard({ item, onPollVote, onLike, onComment, onShare }: FeedItem
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className={isLikedByClient ? "text-destructive" : "text-muted-foreground hover:text-destructive"} 
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={isLikedByClient ? "text-destructive" : "text-muted-foreground hover:text-destructive"}
                   onClick={handleLikeClick}
+                  aria-label={isLikedByClient ? `Unlike post, current likes ${item.likes}` : `Like post, current likes ${item.likes}`}
                 >
                   <Heart className="h-5 w-5" fill={isLikedByClient ? "currentColor" : "none"} />
-                  <span className="sr-only">Like</span>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -178,9 +180,8 @@ function FeedItemCard({ item, onPollVote, onLike, onComment, onShare }: FeedItem
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary" onClick={() => onComment(item.id)}>
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary" onClick={() => onComment(item.id)} aria-label={`Comment on post, current comments ${item.comments}`}>
                   <MessageCircle className="h-5 w-5" />
-                  <span className="sr-only">Comment</span>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -191,9 +192,8 @@ function FeedItemCard({ item, onPollVote, onLike, onComment, onShare }: FeedItem
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary" onClick={() => onShare(item.id)}>
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary" onClick={() => onShare(item.id)} aria-label={`Share post, current shares ${item.shares}`}>
                   <Share2 className="h-5 w-5" />
-                  <span className="sr-only">Share</span>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -231,7 +231,7 @@ export default function HomePage() {
       id: `feed-poll-${newPollData.id}`,
       timestamp: new Date().toISOString(),
       itemType: 'poll_created',
-      creatorName: 'Current User',
+      creatorName: 'Current User', // Placeholder
       creatorImageUrl: 'https://placehold.co/40x40.png?text=CU',
       creatorDataAiHint: 'person face',
       pollId: newPollData.id,
@@ -239,7 +239,7 @@ export default function HomePage() {
       pollOptions: newPollData.options.map(opt => ({ ...opt, votes: 0 })),
       totalVotes: 0,
       userHasVoted: false,
-      likes: 0,
+      likes: 0, // Polls don't have likes/comments/shares in this model
       comments: 0,
       shares: 0,
     };
@@ -294,7 +294,7 @@ export default function HomePage() {
       )
     );
     toast({ title: "Commented!", description: "Your comment has been (conceptually) added." });
-    console.log(`Comment action on item: ${itemId}`);
+    // console.log(`Comment action on item: ${itemId}`);
   };
 
   const handleShare = (itemId: string) => {
@@ -308,7 +308,7 @@ export default function HomePage() {
       )
     );
     toast({ title: "Shared!", description: "The post has been (conceptually) shared." });
-    console.log(`Share action on item: ${itemId}`);
+    // console.log(`Share action on item: ${itemId}`);
   };
 
 
@@ -377,13 +377,24 @@ export default function HomePage() {
 
 
       <h1 className="text-2xl font-bold mb-6 mt-8">Live Feed</h1>
-      {feedItems.length === 0 && <p className="text-muted-foreground text-center py-4">The feed is empty. Try creating a post or poll!</p>}
+      {feedItems.length === 0 && (
+          <Card className="text-center p-8 shadow-md rounded-lg">
+            <SearchIcon className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+            <h2 className="text-xl font-semibold mb-2">The Feed is Quiet</h2>
+            <p className="text-muted-foreground mb-6">
+              No posts yet. Be the first to share something!
+            </p>
+            <Button onClick={() => setIsPostDialogOpen(true)}>
+                <Edit3 className="mr-2 h-4 w-4" /> Create First Post
+            </Button>
+        </Card>
+      )}
       {feedItems.map((item) => (
         <FeedItemCard
             key={item.id}
             item={item}
             onPollVote={handlePollVote}
-            onLike={handleLike} // Pass the updated handleLike
+            onLike={handleLike}
             onComment={handleComment}
             onShare={handleShare}
         />
@@ -391,3 +402,4 @@ export default function HomePage() {
     </div>
   );
 }
+
