@@ -29,6 +29,9 @@ interface BaseFeedItem {
   creatorName: string; 
   creatorImageUrl?: string;
   creatorDataAiHint?: string;
+  likes: number;
+  comments: number;
+  shares: number;
 }
 
 export interface TextPostFeedItem extends BaseFeedItem {

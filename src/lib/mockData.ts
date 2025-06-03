@@ -1,5 +1,5 @@
 
-import type { Candidate, FeedPost, ElectionEvent, Campaign, Poll, VolunteerSignup, MonitoredVolunteer } from '@/types';
+import type { Candidate, FeedPost, ElectionEvent, Campaign, Poll, VolunteerSignup, MonitoredVolunteer, FeedItem } from '@/types';
 
 export const mockCandidates: Candidate[] = [
   {
@@ -37,6 +37,7 @@ export const mockCandidates: Candidate[] = [
   },
 ];
 
+// OldFeedPost type is still defined but this array is typed with FeedPost[] now for the initial transformation
 export const mockFeedPosts: FeedPost[] = [
   {
     id: 'post1',
@@ -223,3 +224,32 @@ export const getCandidateById = (id: string): Candidate | undefined =>
 // Helper to get a single campaign by ID
 export const getCampaignById = (id: string): Campaign | undefined =>
   mockCampaigns.find(campaign => campaign.id === id);
+
+// Initial feed items transformation including new interaction counts
+export const initialFeedItems: FeedItem[] = mockFeedPosts.map((post): FeedItem => {
+  const baseItem = {
+    id: post.id,
+    timestamp: post.timestamp,
+    creatorName: post.candidateName,
+    creatorImageUrl: post.candidateImageUrl,
+    creatorDataAiHint: post.dataAiHintCandidate,
+    likes: post.likes || 0,
+    comments: post.comments || 0,
+    shares: post.shares || 0,
+  };
+
+  if (post.postImageUrl) {
+    return {
+      ...baseItem,
+      itemType: 'image_post',
+      content: post.content,
+      mediaUrl: post.postImageUrl,
+      mediaDataAiHint: post.dataAiHintPost,
+    };
+  }
+  return {
+    ...baseItem,
+    itemType: 'text_post',
+    content: post.content,
+  };
+}).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());

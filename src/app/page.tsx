@@ -8,11 +8,11 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
-  ThumbsUp, MessageCircle, Share2, Flag,
-  Edit3, BarChart2, Video as VideoIcon, PlusCircle
+  ThumbsUp, MessageCircle, Share2,
+  Edit3, BarChart2, Video as VideoIcon
 } from 'lucide-react';
-import { mockFeedPosts as initialMockFeedPosts } from '@/lib/mockData';
-import type { FeedItem, TextPostFeedItem, ImagePostFeedItem, VideoPostFeedItem, CampaignFeedItem, PollFeedItem, PollOption as FeedPollOption, Campaign, Poll, OldFeedPost } from '@/types';
+import { initialFeedItems as mockInitialFeedItems } from '@/lib/mockData'; // Use updated initialFeedItems
+import type { FeedItem, TextPostFeedItem, ImagePostFeedItem, VideoPostFeedItem, CampaignFeedItem, PollFeedItem, PollOption as FeedPollOption, Campaign, Poll } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
 import {
   Tooltip,
@@ -29,15 +29,19 @@ import {
 import { CreatePostForm } from '@/components/forms/CreatePostForm';
 import { CreatePollForm } from '@/components/forms/CreatePollForm';
 import { CreateVideoForm } from '@/components/forms/CreateVideoForm'; 
-import { Progress } from '@/components/ui/progress'; // Added for poll percentages
+import { Progress } from '@/components/ui/progress';
+import { useToast } from '@/hooks/use-toast';
 
 
 interface FeedItemCardProps {
   item: FeedItem;
   onPollVote?: (pollId: string, optionId: string) => void;
+  onLike: (itemId: string) => void;
+  onComment: (itemId: string) => void;
+  onShare: (itemId: string) => void;
 }
 
-function FeedItemCard({ item, onPollVote }: FeedItemCardProps) {
+function FeedItemCard({ item, onPollVote, onLike, onComment, onShare }: FeedItemCardProps) {
   const renderMedia = () => {
     if (item.itemType === 'image_post' && item.mediaUrl) {
       return (
@@ -140,57 +144,44 @@ function FeedItemCard({ item, onPollVote }: FeedItemCardProps) {
         {renderContent()}
         {renderMedia()}
       </CardContent>
-      {item.itemType !== 'poll_created' && ( // Hide footer for polls as actions are inside content
+      {(item.itemType === 'text_post' || item.itemType === 'image_post' || item.itemType === 'video_post') && (
         <CardFooter className="flex justify-around p-2 border-t">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary" onClick={() => onLike(item.id)}>
                   <ThumbsUp className="h-5 w-5" />
                   <span className="sr-only">Like</span>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Like (0)</p> 
+                <p>Like ({item.likes})</p> 
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary" onClick={() => onComment(item.id)}>
                   <MessageCircle className="h-5 w-5" />
                   <span className="sr-only">Comment</span>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Comment (0)</p> 
+                <p>Comment ({item.comments})</p> 
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary" onClick={() => onShare(item.id)}>
                   <Share2 className="h-5 w-5" />
                   <span className="sr-only">Share</span>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Share (0)</p> 
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
-                  <Flag className="h-5 w-5" />
-                  <span className="sr-only">Report</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Report</p>
+                <p>Share ({item.shares})</p> 
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -200,37 +191,13 @@ function FeedItemCard({ item, onPollVote }: FeedItemCardProps) {
   );
 }
 
-const initialFeedItems: FeedItem[] = initialMockFeedPosts.map((post: OldFeedPost): FeedItem => {
-  if (post.postImageUrl) {
-    return {
-      id: post.id,
-      timestamp: post.timestamp,
-      creatorName: post.candidateName,
-      creatorImageUrl: post.candidateImageUrl,
-      creatorDataAiHint: post.dataAiHintCandidate,
-      itemType: 'image_post',
-      content: post.content,
-      mediaUrl: post.postImageUrl,
-      mediaDataAiHint: post.dataAiHintPost,
-    };
-  }
-  return {
-    id: post.id,
-    timestamp: post.timestamp,
-    creatorName: post.candidateName,
-    creatorImageUrl: post.candidateImageUrl,
-    creatorDataAiHint: post.dataAiHintCandidate,
-    itemType: 'text_post',
-    content: post.content,
-  };
-}).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-
 
 export default function HomePage() {
-  const [feedItems, setFeedItems] = useState<FeedItem[]>(initialFeedItems);
+  const [feedItems, setFeedItems] = useState<FeedItem[]>(mockInitialFeedItems);
   const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
   const [isPollDialogOpen, setIsPollDialogOpen] = useState(false);
   const [isVideoDialogOpen, setIsVideoDialogOpen] = useState(false);
+  const { toast } = useToast();
 
   const addNewFeedItem = (newItem: FeedItem) => {
     setFeedItems(prevItems =>
@@ -239,7 +206,7 @@ export default function HomePage() {
   };
 
   const handleCreatePost = (newPost: TextPostFeedItem | ImagePostFeedItem) => {
-    addNewFeedItem(newPost);
+    addNewFeedItem({ ...newPost, likes: 0, comments: 0, shares: 0 });
     setIsPostDialogOpen(false);
   };
   
@@ -253,16 +220,19 @@ export default function HomePage() {
       creatorDataAiHint: 'person face',
       pollId: newPollData.id, 
       pollQuestion: newPollData.question,
-      pollOptions: newPollData.options.map(opt => ({ ...opt, votes: 0 })), // Initialize votes
+      pollOptions: newPollData.options.map(opt => ({ ...opt, votes: 0 })),
       totalVotes: 0,
       userHasVoted: false,
+      likes: 0, 
+      comments: 0,
+      shares: 0,
     };
     addNewFeedItem(pollFeedItem);
     setIsPollDialogOpen(false);
   };
   
   const handleCreateVideo = (newVideo: VideoPostFeedItem) => {
-    addNewFeedItem(newVideo);
+    addNewFeedItem({ ...newVideo, likes: 0, comments: 0, shares: 0 });
     setIsVideoDialogOpen(false);
   };
 
@@ -283,6 +253,36 @@ export default function HomePage() {
         return item;
       })
     );
+  };
+
+  const handleLike = (itemId: string) => {
+    setFeedItems(prevItems =>
+      prevItems.map(item =>
+        item.id === itemId ? { ...item, likes: item.likes + 1 } : item
+      )
+    );
+  };
+
+  const handleComment = (itemId: string) => {
+    setFeedItems(prevItems =>
+      prevItems.map(item =>
+        item.id === itemId ? { ...item, comments: item.comments + 1 } : item
+      )
+    );
+    // In a real app, this would open a comment input or section
+    toast({ title: "Commented!", description: "Your comment has been (conceptually) added." });
+    console.log(`Comment action on item: ${itemId}`);
+  };
+
+  const handleShare = (itemId: string) => {
+     setFeedItems(prevItems =>
+      prevItems.map(item =>
+        item.id === itemId ? { ...item, shares: item.shares + 1 } : item
+      )
+    );
+    // In a real app, this would open a share dialog
+    toast({ title: "Shared!", description: "The post has been (conceptually) shared." });
+    console.log(`Share action on item: ${itemId}`);
   };
 
 
@@ -313,7 +313,7 @@ export default function HomePage() {
               <TooltipContent><p>Upload a Video</p></TooltipContent>
             </Tooltip>
           </TooltipProvider>
-
+          
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -353,7 +353,14 @@ export default function HomePage() {
       <h1 className="text-2xl font-bold mb-6 mt-8">Live Feed</h1>
       {feedItems.length === 0 && <p className="text-muted-foreground text-center py-4">The feed is empty. Try creating a post or poll!</p>}
       {feedItems.map((item) => (
-        <FeedItemCard key={item.id} item={item} onPollVote={handlePollVote} />
+        <FeedItemCard 
+            key={item.id} 
+            item={item} 
+            onPollVote={handlePollVote}
+            onLike={handleLike}
+            onComment={handleComment}
+            onShare={handleShare}
+        />
       ))}
     </div>
   );
