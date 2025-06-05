@@ -96,12 +96,13 @@ export interface OldFeedPost {
 }
 
 
+export type ElectionEventType = 'Deadline' | 'Key Event' | 'Election Day';
 export interface ElectionEvent {
   id: string;
   title: string;
-  date: string;
+  date: string; // Keep as string for mock data simplicity, parse when needed
   description: string;
-  type: 'Deadline' | 'Key Event' | 'Election Day';
+  type: ElectionEventType;
 }
 
 export interface Campaign {
@@ -167,4 +168,31 @@ export interface FirestoreRole {
   uid: string;
   role: Role;
   updatedAt: string;
+}
+
+// Added for Admin Panel User Management
+export type UserStatus = 'Active' | 'Suspended' | 'Pending Verification';
+
+export interface AdminUser {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  status: UserStatus;
+  verified?: boolean; // Typically for candidates
+}
+
+// Added for Admin Panel Content Moderation
+export type ReportedContentStatus = 'Pending' | 'Approved' | 'Rejected';
+
+export interface ReportedContentItem {
+  id: string;
+  contentType: 'Post' | 'Comment' | 'Profile'; // Example content types
+  reportedBy: string; // User ID or name
+  reason: string;
+  contentSnippet: string; // A short preview of the content
+  timestamp: string; // ISO string
+  status: ReportedContentStatus;
+  targetContentId: string; // ID of the reported post, comment, etc.
+  targetUserId?: string; // ID of the user who created the content
 }

@@ -1,5 +1,5 @@
 
-import type { Candidate, FeedPost, ElectionEvent, Campaign, Poll, VolunteerSignup, MonitoredVolunteer, FeedItem } from '@/types';
+import type { Candidate, FeedPost, ElectionEvent, Campaign, Poll, VolunteerSignup, MonitoredVolunteer, FeedItem, AdminUser, Role, UserStatus, ReportedContentItem, ReportedContentStatus, ElectionEventType } from '@/types';
 
 export const mockCandidates: Candidate[] = [
   {
@@ -37,7 +37,6 @@ export const mockCandidates: Candidate[] = [
   },
 ];
 
-// OldFeedPost type is still defined but this array is typed with FeedPost[] now for the initial transformation
 export const mockFeedPosts: FeedPost[] = [
   {
     id: 'post1',
@@ -84,32 +83,35 @@ export const mockFeedPosts: FeedPost[] = [
   },
 ];
 
+const today = new Date();
+const formatDate = (date: Date): string => date.toISOString().split('T')[0];
+
 export const mockElectionEvents: ElectionEvent[] = [
   {
     id: 'event1',
     title: 'Voter Registration Deadline',
-    date: new Date(Date.now() + 86400000 * 7).toLocaleDateString(), // 7 days from now
+    date: formatDate(new Date(today.getTime() + 86400000 * 7)), // 7 days from now
     description: 'Last day to register to vote for the upcoming general election.',
     type: 'Deadline',
   },
   {
     id: 'event2',
     title: 'Mayoral Debate',
-    date: new Date(Date.now() + 86400000 * 14).toLocaleDateString(), // 14 days from now
+    date: formatDate(new Date(today.getTime() + 86400000 * 14)), // 14 days from now
     description: 'Live televised debate between mayoral candidates.',
     type: 'Key Event',
   },
   {
     id: 'event3',
     title: 'Early Voting Begins',
-    date: new Date(Date.now() + 86400000 * 21).toLocaleDateString(), // 21 days from now
+    date: formatDate(new Date(today.getTime() + 86400000 * 21)), // 21 days from now
     description: 'Early in-person voting locations open across the county.',
     type: 'Key Event',
   },
   {
     id: 'event4',
     title: 'General Election Day',
-    date: new Date(Date.now() + 86400000 * 30).toLocaleDateString(), // 30 days from now
+    date: formatDate(new Date(today.getTime() + 86400000 * 30)), // 30 days from now
     description: 'Polls open from 7 AM to 7 PM. Make your voice heard!',
     type: 'Election Day',
   },
@@ -253,3 +255,50 @@ export const initialFeedItems: FeedItem[] = mockFeedPosts.map((post): FeedItem =
     content: post.content,
   };
 }).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+
+export const mockAdminUsers: AdminUser[] = [
+  { id: 'admin-001', name: 'Adeline Min', email: 'adeline.m@example.com', role: 'ADMIN', status: 'Active' },
+  { id: 'user-001', name: 'Bernard Voter', email: 'b.voter@example.com', role: 'VOTER', status: 'Active' },
+  { id: 'cand-001', name: 'Cynthia Date', email: 'c.date.campaign@example.com', role: 'CANDIDATE', status: 'Active', verified: true },
+  { id: 'vol-001', name: 'David Helper', email: 'd.helper@example.com', role: 'VOLUNTEER', status: 'Pending Verification' },
+  { id: 'user-002', name: 'Eleanor Suspended', email: 'e.suspended@example.com', role: 'VOTER', status: 'Suspended' },
+  { id: 'cand-002', name: 'Frank Prospect', email: 'f.prospect@example.com', role: 'CANDIDATE', status: 'Pending Verification', verified: false },
+  { id: 'user-003', name: 'George Active', email: 'g.active@example.com', role: 'VOTER', status: 'Active' },
+];
+
+export const mockReportedContent: ReportedContentItem[] = [
+  {
+    id: 'report-001',
+    contentType: 'Post',
+    reportedBy: 'Bernard Voter (user-001)',
+    reason: 'Misinformation regarding polling locations.',
+    contentSnippet: 'PSA: All polling stations in District 5 will now be open until 9 PM! Make sure to tell your friends...',
+    timestamp: new Date(Date.now() - 3600000 * 2).toISOString(), // 2 hours ago
+    status: 'Pending',
+    targetContentId: 'post-xyz-123',
+    targetUserId: 'user-abc-789',
+  },
+  {
+    id: 'report-002',
+    contentType: 'Comment',
+    reportedBy: 'Adeline Min (admin-001)',
+    reason: 'Hate speech and abusive language towards a candidate.',
+    contentSnippet: 'You are all idiots if you vote for @Candice Date! She is a **** and a ****!',
+    timestamp: new Date(Date.now() - 3600000 * 5).toISOString(), // 5 hours ago
+    status: 'Rejected', // Example of an action already taken
+    targetContentId: 'comment-qrs-456',
+    targetUserId: 'user-def-456',
+  },
+  {
+    id: 'report-003',
+    contentType: 'Profile',
+    reportedBy: 'System Flag',
+    reason: 'Profile impersonating a public figure.',
+    contentSnippet: 'Official Profile of Mayor McCheese. Endorsing Frank Prospect.',
+    timestamp: new Date(Date.now() - 3600000 * 24).toISOString(), // 1 day ago
+    status: 'Approved', // Example: Maybe admin reviewed and confirmed it's a fan page not impersonation
+    targetContentId: 'profile-jkl-789',
+    targetUserId: 'user-ghi-123',
+  },
+];
