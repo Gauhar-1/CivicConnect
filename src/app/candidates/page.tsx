@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -41,7 +42,7 @@ function CandidateCard({ candidate }: { candidate: Candidate }) {
         </ul>
       </CardContent>
       <CardFooter className="p-4 border-t">
-        <Link href={`/candidates/${candidate.id}`} passHref legacyBehavior>
+        <Link href={`/candidates/${candidate.id}`} >
           <Button variant="outline" size="sm" className="w-full">
             View Full Profile <ChevronRight className="ml-1 h-4 w-4" />
           </Button>

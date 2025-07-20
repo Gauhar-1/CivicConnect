@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useParams } from 'next/navigation';
@@ -20,7 +21,7 @@ export default function CandidateProfilePage() {
         <AlertCircle className="mx-auto h-12 w-12 text-destructive mb-4" />
         <h1 className="text-2xl font-bold">Candidate Not Found</h1>
         <p className="text-muted-foreground">The candidate profile you are looking for does not exist.</p>
-        <Link href="/candidates" passHref legacyBehavior>
+        <Link href="/candidates">
           <Button variant="outline" className="mt-6">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Directory
@@ -32,7 +33,7 @@ export default function CandidateProfilePage() {
 
   return (
     <div className="space-y-8">
-      <Link href="/candidates" passHref legacyBehavior>
+      <Link href="/candidates">
         <Button variant="outline" size="sm">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Directory
@@ -59,7 +60,7 @@ export default function CandidateProfilePage() {
                 <MapPin className="inline h-4 w-4 mr-1" />{candidate.region}
               </CardDescription>
               {candidate.manifestoUrl && (
-                <Link href={candidate.manifestoUrl} passHref legacyBehavior>
+                <Link href={candidate.manifestoUrl}>
                   <Button variant="link" className="px-0 mt-2 text-primary">
                     <FileText className="mr-2 h-4 w-4" /> View Full Manifesto
                   </Button>

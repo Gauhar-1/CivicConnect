@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,9 +9,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label'; 
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { mockCampaigns } from '@/lib/mockData';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { mockCampaigns as initialMockCampaigns } from '@/lib/mockData';
 import type { Campaign } from '@/types';
-import { Search, Filter, TrendingUp, MapPin, ChevronRight } from 'lucide-react';
+import { Search, Filter, TrendingUp, MapPin, ChevronRight, PlusCircle } from 'lucide-react';
+import { CreateCampaignForm } from '@/components/forms/CreateCampaignForm';
 
 function CampaignCard({ campaign }: { campaign: Campaign }) {
   return (
@@ -37,26 +40,30 @@ function CampaignCard({ campaign }: { campaign: Campaign }) {
         <p className="text-sm text-muted-foreground line-clamp-3">{campaign.description}</p>
       </CardContent>
       <CardFooter className="p-4 border-t">
-        <Button variant="outline" size="sm" className="w-full">
-          Learn More <ChevronRight className="ml-1 h-4 w-4" />
-        </Button>
+        <Link href={`/campaigns/${campaign.id}`}>
+          <Button variant="outline" size="sm" className="w-full">
+            Learn More <ChevronRight className="ml-1 h-4 w-4" />
+          </Button>
+        </Link>
       </CardFooter>
     </Card>
   );
 }
 
 export default function CampaignDiscoveryPage() {
+  const [campaigns, setCampaigns] = useState<Campaign[]>(initialMockCampaigns);
   const [searchTerm, setSearchTerm] = useState('');
-  const [locationFilter, setLocationFilter] = useState('');
+  const [locationFilter, setLocationFilter] = useState('all');
   const [partyFilter, setPartyFilter] = useState('all');
   const [sortBy, setSortBy] = useState('popularity');
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
-  const parties = useMemo(() => ['all', ...new Set(mockCampaigns.map(c => c.party).filter(Boolean) as string[])], []);
-  const locations = useMemo(() => ['all', ...new Set(mockCampaigns.map(c => c.location).filter(Boolean) as string[])], []);
+  const parties = useMemo(() => ['all', ...new Set(campaigns.map(c => c.party).filter(Boolean) as string[])], [campaigns]);
+  const locations = useMemo(() => ['all', ...new Set(campaigns.map(c => c.location).filter(Boolean) as string[])], [campaigns]);
 
 
   const filteredAndSortedCampaigns = useMemo(() => {
-    let campaigns = mockCampaigns.filter(campaign => {
+    let filtered = campaigns.filter(campaign => {
       const matchesSearch = campaign.name.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesLocation = locationFilter === '' || locationFilter === 'all' || campaign.location.toLowerCase().includes(locationFilter.toLowerCase());
       const matchesParty = partyFilter === 'all' || campaign.party === partyFilter;
@@ -64,24 +71,44 @@ export default function CampaignDiscoveryPage() {
     });
 
     if (sortBy === 'popularity') {
-      campaigns.sort((a, b) => b.popularityScore - a.popularityScore);
+      filtered.sort((a, b) => b.popularityScore - a.popularityScore);
     } else if (sortBy === 'newest') {
-      // Assuming campaigns have a creation date or use ID for mock newness
-      campaigns.sort((a, b) => parseInt(b.id.replace('camp','')) - parseInt(a.id.replace('camp','')));
+      filtered.sort((a, b) => parseInt(b.id.replace('camp','')) - parseInt(a.id.replace('camp','')));
     } else if (sortBy === 'name') {
-      campaigns.sort((a,b) => a.name.localeCompare(b.name));
+      filtered.sort((a,b) => a.name.localeCompare(b.name));
     }
+    return filtered;
+  }, [searchTerm, locationFilter, partyFilter, sortBy, campaigns]);
 
-
-    return campaigns;
-  }, [searchTerm, locationFilter, partyFilter, sortBy]);
+  const handleCreateCampaign = (newCampaign: Campaign) => {
+    setCampaigns(prevCampaigns => [newCampaign, ...prevCampaigns]);
+    setIsCreateDialogOpen(false); // Close dialog after creation
+  };
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6 flex items-center">
-        <Search className="mr-3 h-7 w-7 text-primary" />
-        Campaign Discovery
-      </h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold flex items-center">
+          <Search className="mr-3 h-7 w-7 text-primary" />
+          Campaign Discovery
+        </h1>
+        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <PlusCircle className="mr-2 h-4 w-4" /> Create New Campaign
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[480px] overflow-y-auto max-h-[90vh]">
+            <DialogHeader>
+              <DialogTitle>Create a New Campaign</DialogTitle>
+              <DialogDescription>
+                Fill in the details below to launch your campaign.
+              </DialogDescription>
+            </DialogHeader>
+            <CreateCampaignForm onSubmitSuccess={handleCreateCampaign} onOpenChange={setIsCreateDialogOpen} />
+          </DialogContent>
+        </Dialog>
+      </div>
       <p className="text-muted-foreground mb-6">
         Discover and follow campaigns based on location, political party, and popularity.
       </p>
@@ -144,7 +171,7 @@ export default function CampaignDiscoveryPage() {
           ))}
         </div>
       ) : (
-        <p className="text-center text-muted-foreground py-8">No campaigns found matching your criteria.</p>
+        <p className="text-center text-muted-foreground py-8">No campaigns found matching your criteria. Try creating one!</p>
       )}
     </div>
   );

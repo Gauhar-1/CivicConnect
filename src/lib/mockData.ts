@@ -1,4 +1,5 @@
-import type { Candidate, FeedPost, ElectionEvent, Campaign, Report } from '@/types';
+
+import type { Candidate,  ElectionEvent, Campaign, Poll, VolunteerSignup, MonitoredVolunteer, FeedItem, AdminUser, Role, UserStatus, ReportedContentItem, ReportedContentStatus, ElectionEventType } from '@/types';
 
 export const mockCandidates: Candidate[] = [
   {
@@ -36,7 +37,7 @@ export const mockCandidates: Candidate[] = [
   },
 ];
 
-export const mockFeedPosts: FeedPost[] = [
+export const mockFeedPosts = [
   {
     id: 'post1',
     candidateName: 'Alice Wonderland',
@@ -64,7 +65,6 @@ export const mockFeedPosts: FeedPost[] = [
     likes: 230,
     comments: 45,
     shares: 20,
-    dataAiHintPost: ''
   },
   {
     id: 'post3',
@@ -83,32 +83,35 @@ export const mockFeedPosts: FeedPost[] = [
   },
 ];
 
+const today = new Date();
+const formatDate = (date: Date): string => date.toISOString().split('T')[0];
+
 export const mockElectionEvents: ElectionEvent[] = [
   {
     id: 'event1',
     title: 'Voter Registration Deadline',
-    date: new Date(Date.now() + 86400000 * 7).toLocaleDateString(), // 7 days from now
+    date: formatDate(new Date(today.getTime() + 86400000 * 7)), // 7 days from now
     description: 'Last day to register to vote for the upcoming general election.',
     type: 'Deadline',
   },
   {
     id: 'event2',
     title: 'Mayoral Debate',
-    date: new Date(Date.now() + 86400000 * 14).toLocaleDateString(), // 14 days from now
+    date: formatDate(new Date(today.getTime() + 86400000 * 14)), // 14 days from now
     description: 'Live televised debate between mayoral candidates.',
     type: 'Key Event',
   },
   {
     id: 'event3',
     title: 'Early Voting Begins',
-    date: new Date(Date.now() + 86400000 * 21).toLocaleDateString(), // 21 days from now
+    date: formatDate(new Date(today.getTime() + 86400000 * 21)), // 21 days from now
     description: 'Early in-person voting locations open across the county.',
     type: 'Key Event',
   },
   {
     id: 'event4',
     title: 'General Election Day',
-    date: new Date(Date.now() + 86400000 * 30).toLocaleDateString(), // 30 days from now
+    date: formatDate(new Date(today.getTime() + 86400000 * 30)), // 30 days from now
     description: 'Polls open from 7 AM to 7 PM. Make your voice heard!',
     type: 'Election Day',
   },
@@ -150,28 +153,152 @@ export const mockCampaigns: Campaign[] = [
   },
 ];
 
-export const mockReports: Report[] = [
-    {
-        id: 'rep1',
-        title: 'Misleading Campaign Ad',
-        description: 'A TV advertisement for candidate X contains false claims about candidate Y\'s voting record.',
-        category: 'False Information',
-        status: 'In Review',
-        dateSubmitted: new Date(Date.now() - 86400000 * 2).toISOString(), // 2 days ago
-        isAnonymous: false,
-    },
-    {
-        id: 'rep2',
-        title: 'Voter Intimidation at Poll Site',
-        description: 'Observed individuals harassing voters at the Elm Street polling location.',
-        category: 'Election Process',
-        status: 'Submitted',
-        dateSubmitted: new Date(Date.now() - 86400000 * 1).toISOString(), // 1 day ago
-        isAnonymous: true,
-    }
+
+export const mockPolls: Poll[] = [];
+
+export const mockMonitoredVolunteers: MonitoredVolunteer[] = [
+  {
+    id: 'vol1',
+    fullName: 'John Volunteer',
+    email: 'john.vol@example.com',
+    phone: '555-111-2222',
+    volunteerTarget: 'candidate',
+    specificCandidateName: 'Alice Wonderland',
+    interests: ['canvassing', 'event_support'],
+    availability: 'Weekends (Flexible hours)',
+    message: 'Eager to help Alice win!',
+    submittedAt: new Date(Date.now() - 86400000 * 3).toISOString(), // 3 days ago
+    status: 'Active',
+  },
+  {
+    id: 'vol2',
+    fullName: 'Jane Helper',
+    email: 'jane.help@example.com',
+    phone: '555-333-4444',
+    volunteerTarget: 'general',
+    interests: ['phone_banking', 'data_entry', 'social_media'],
+    availability: 'Weekdays - Afternoon (1pm-5pm)',
+    submittedAt: new Date(Date.now() - 86400000 * 1).toISOString(), // 1 day ago
+    status: 'Pending Review',
+  },
+  {
+    id: 'vol3',
+    fullName: 'Sam Supporter',
+    email: 'sam.sup@example.com',
+    volunteerTarget: 'candidate',
+    specificCandidateName: 'Bob The Builder',
+    interests: ['event_support'],
+    availability: 'Fully Flexible',
+    message: 'Ready to support Bob in any way possible.',
+    submittedAt: new Date(Date.now() - 86400000 * 5).toISOString(), // 5 days ago
+    status: 'Active',
+  },
+  {
+    id: 'vol4',
+    fullName: 'Casey Canvasser',
+    email: 'casey.canvass@example.com',
+    phone: '555-888-9999',
+    volunteerTarget: 'candidate',
+    specificCandidateName: 'Alice Wonderland',
+    interests: ['canvassing', 'social_media'],
+    availability: 'Weekdays - Evening (6pm-9pm)',
+    submittedAt: new Date(Date.now() - 86400000 * 2).toISOString(), // 2 days ago
+    status: 'Pending Review',
+  },
+  {
+    id: 'vol5',
+    fullName: 'Alex Admin',
+    email: 'alex.admin@example.com',
+    volunteerTarget: 'general',
+    interests: ['data_entry'],
+    availability: 'Weekdays - Morning (9am-12pm)',
+    message: 'Good with spreadsheets and organizing data.',
+    submittedAt: new Date(Date.now() - 86400000 * 10).toISOString(), // 10 days ago
+    status: 'Inactive',
+  }
 ];
+
 
 // Helper to get a single candidate by ID
 export const getCandidateById = (id: string): Candidate | undefined => 
   mockCandidates.find(candidate => candidate.id === id);
 
+// Helper to get a single campaign by ID
+export const getCampaignById = (id: string): Campaign | undefined =>
+  mockCampaigns.find(campaign => campaign.id === id);
+
+// Initial feed items transformation including new interaction counts
+export const initialFeedItems: FeedItem[] = mockFeedPosts.map((post): FeedItem => {
+  const baseItem = {
+    id: post.id,
+    timestamp: post.timestamp,
+    creatorName: post.candidateName,
+    creatorImageUrl: post.candidateImageUrl,
+    creatorDataAiHint: post.dataAiHintCandidate,
+    likes: post.likes || 0,
+    comments: post.comments || 0,
+    shares: post.shares || 0,
+  };
+
+  if (post.postImageUrl) {
+    return {
+      ...baseItem,
+      itemType: 'image_post',
+      content: post.content,
+      mediaUrl: post.postImageUrl,
+      mediaDataAiHint: post.dataAiHintPost,
+    };
+  }
+  return {
+    ...baseItem,
+    itemType: 'text_post',
+    content: post.content,
+  };
+}).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+
+export const mockAdminUsers: AdminUser[] = [
+  { id: 'admin-001', name: 'Adeline Min', email: 'adeline.m@example.com', role: 'ADMIN', status: 'Active' },
+  { id: 'user-001', name: 'Bernard Voter', email: 'b.voter@example.com', role: 'VOTER', status: 'Active' },
+  { id: 'cand-001', name: 'Cynthia Date', email: 'c.date.campaign@example.com', role: 'CANDIDATE', status: 'Active', verified: true },
+  { id: 'vol-001', name: 'David Helper', email: 'd.helper@example.com', role: 'VOLUNTEER', status: 'Pending Verification' },
+  { id: 'user-002', name: 'Eleanor Suspended', email: 'e.suspended@example.com', role: 'VOTER', status: 'Suspended' },
+  { id: 'cand-002', name: 'Frank Prospect', email: 'f.prospect@example.com', role: 'CANDIDATE', status: 'Pending Verification', verified: false },
+  { id: 'user-003', name: 'George Active', email: 'g.active@example.com', role: 'VOTER', status: 'Active' },
+];
+
+export const mockReportedContent: ReportedContentItem[] = [
+  {
+    id: 'report-001',
+    contentType: 'Post',
+    reportedBy: 'Bernard Voter (user-001)',
+    reason: 'Misinformation regarding polling locations.',
+    contentSnippet: 'PSA: All polling stations in District 5 will now be open until 9 PM! Make sure to tell your friends...',
+    timestamp: new Date(Date.now() - 3600000 * 2).toISOString(), // 2 hours ago
+    status: 'Pending',
+    targetContentId: 'post-xyz-123',
+    targetUserId: 'user-abc-789',
+  },
+  {
+    id: 'report-002',
+    contentType: 'Comment',
+    reportedBy: 'Adeline Min (admin-001)',
+    reason: 'Hate speech and abusive language towards a candidate.',
+    contentSnippet: 'You are all idiots if you vote for @Candice Date! She is a **** and a ****!',
+    timestamp: new Date(Date.now() - 3600000 * 5).toISOString(), // 5 hours ago
+    status: 'Rejected', // Example of an action already taken
+    targetContentId: 'comment-qrs-456',
+    targetUserId: 'user-def-456',
+  },
+  {
+    id: 'report-003',
+    contentType: 'Profile',
+    reportedBy: 'System Flag',
+    reason: 'Profile impersonating a public figure.',
+    contentSnippet: 'Official Profile of Mayor McCheese. Endorsing Frank Prospect.',
+    timestamp: new Date(Date.now() - 3600000 * 24).toISOString(), // 1 day ago
+    status: 'Approved', // Example: Maybe admin reviewed and confirmed it's a fan page not impersonation
+    targetContentId: 'profile-jkl-789',
+    targetUserId: 'user-ghi-123',
+  },
+];
