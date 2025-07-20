@@ -13,7 +13,7 @@ interface RequiredAuthProps {
   redirectTo?: string;
 }
 
-export function RequiredAuth({ children, allowedRoles, redirectTo = '/' }: RequiredAuthProps) {
+export function RequiredAuth({ children, allowedRoles, redirectTo = '/login' }: RequiredAuthProps) {
   const { user, role, isLoading } = useAuth();
   const router = useRouter();
 
@@ -21,19 +21,14 @@ export function RequiredAuth({ children, allowedRoles, redirectTo = '/' }: Requi
     return <div className="flex justify-center items-center min-h-[calc(100vh-10rem)]"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   }
 
-  // If login is disabled, user will be null and isLoading false.
-  // In this state, allow access to all "protected" routes.
-  // When login is re-enabled, this logic will correctly protect routes.
-  if (!user && !isLoading) { 
-    // If we intended to block access when no user, this would be where redirection happens.
-    // For "login removed for now", we let them pass.
-    // Original logic for redirection:
-    // if (!user || !allowedRoles.includes(role)) {
-    //   setTimeout(() => router.push(redirectTo), 0);
-    //   return <div className="flex justify-center items-center min-h-[calc(100vh-10rem)]"><p>Redirecting...</p><Loader2 className="ml-2 h-5 w-5 animate-spin text-primary" /></div>;
-    // }
-  } else if (user && !allowedRoles.includes(role)) { // If there IS a user, but wrong role
+  if (!user) {
     setTimeout(() => router.push(redirectTo), 0);
+    return <div className="flex justify-center items-center min-h-[calc(100vh-10rem)]"><p>Redirecting...</p><Loader2 className="ml-2 h-5 w-5 animate-spin text-primary" /></div>;
+  }
+  
+  if (!allowedRoles.includes(role)) {
+    // If user is logged in but doesn't have the right role, send them home
+    setTimeout(() => router.push('/'), 0);
     return <div className="flex justify-center items-center min-h-[calc(100vh-10rem)]"><p>Redirecting (Access Denied)...</p><Loader2 className="ml-2 h-5 w-5 animate-spin text-primary" /></div>;
   }
 
