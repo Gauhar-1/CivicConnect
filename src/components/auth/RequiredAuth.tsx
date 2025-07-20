@@ -21,16 +21,16 @@ export function RequiredAuth({ children, allowedRoles, redirectTo = '/login' }: 
     return <div className="flex justify-center items-center min-h-[calc(100vh-10rem)]"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   }
 
-  if (!user) {
-    setTimeout(() => router.push(redirectTo), 0);
-    return <div className="flex justify-center items-center min-h-[calc(100vh-10rem)]"><p>Redirecting...</p><Loader2 className="ml-2 h-5 w-5 animate-spin text-primary" /></div>;
-  }
+  // if (!user) {
+  //   setTimeout(() => router.push(redirectTo), 0);
+  //   return <div className="flex justify-center items-center min-h-[calc(100vh-10rem)]"><p>Redirecting...</p><Loader2 className="ml-2 h-5 w-5 animate-spin text-primary" /></div>;
+  // }
   
-  if (!allowedRoles.includes(role)) {
-    // If user is logged in but doesn't have the right role, send them home
-    setTimeout(() => router.push('/'), 0);
-    return <div className="flex justify-center items-center min-h-[calc(100vh-10rem)]"><p>Redirecting (Access Denied)...</p><Loader2 className="ml-2 h-5 w-5 animate-spin text-primary" /></div>;
-  }
+  // if (!allowedRoles.includes(role)) {
+  //   // If user is logged in but doesn't have the right role, send them home
+  //   setTimeout(() => router.push('/'), 0);
+  //   return <div className="flex justify-center items-center min-h-[calc(100vh-10rem)]"><p>Redirecting (Access Denied)...</p><Loader2 className="ml-2 h-5 w-5 animate-spin text-primary" /></div>;
+  // }
 
 
   return <>{children}</>;
